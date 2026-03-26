@@ -1,0 +1,208 @@
+import Anthropic from '@anthropic-ai/sdk'
+import { createServiceClient } from '@/lib/supabase/service'
+import type { LineItem } from '@/types/database'
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+interface QuoteTrigger {
+  action: 'generate_quote'
+  line_items: LineItem[]
+  customer_name: string
+  subtotal: number
+  total: number
+}
+
+type ConversationResult =
+  | { type: 'message'; text: string }
+  | { type: 'quote_created'; quoteId: string }
+
+const SYSTEM_PROMPT = `You are a quoting assistant for a tradesperson (plumber/electrician/HVAC tech).
+Help them build a professional job quote through natural conversation.
+
+RULES:
+1. Never ask for info you can already infer. "Fixed pipe $120" = one complete line item. Add it. Don't ask for breakdown.
+2. Ask ONE question at a time. Never list multiple questions.
+3. Confirm what you captured before moving on: "Got it — pipe repair $120 ✓"
+4. If price is missing, ask once. If still missing, add as TBD and continue.
+5. After each item ask: "Anything else on this job?"
+6. When user signals done (no/nope/that's it/done/send it), show full summary with total.
+7. Keep replies under 3 lines. They're on a phone.
+8. After confirming the summary, ask for customer name.
+9. Once you have customer name, output ONLY this JSON (no other text):
+   {"action":"generate_quote","line_items":[...],"customer_name":"...","subtotal":0,"total":0}`
+
+export async function handleConversation(
+  userId: string,
+  message: string,
+  threadId: string
+): Promise<ConversationResult> {
+  const supabase = createServiceClient()
+
+  // 1. Load or create quote_session
+  let { data: session } = await supabase
+    .from('quote_sessions')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('whatsapp_thread_id', threadId)
+    .eq('state', 'collecting')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single()
+
+  if (!session) {
+    const { data: newSession, error } = await supabase
+      .from('quote_sessions')
+      .insert({
+        user_id: userId,
+        whatsapp_thread_id: threadId,
+        state: 'collecting',
+        quote_draft: {},
+        messages: [],
+      })
+      .select()
+      .single()
+
+    if (error || !newSession) throw new Error(`Failed to create session: ${error?.message}`)
+    session = newSession
+  }
+
+  // 2. Append user message
+  const messages = (session.messages as { role: string; content: string }[]) ?? []
+  messages.push({ role: 'user', content: message })
+
+  // 3. Load user settings + price memory for context
+  const [{ data: userProfile }, { data: priceMemory }] = await Promise.all([
+    supabase.from('users').select('default_tax_rate').eq('id', userId).single(),
+    supabase.from('price_memory').select('job_type, last_labor, last_total, use_count').eq('user_id', userId).order('use_count', { ascending: false }).limit(10),
+  ])
+
+  const taxRate = userProfile?.default_tax_rate ?? 0
+  const priceMemoryText = priceMemory?.length
+    ? priceMemory.map(p => `${p.job_type}: last total £${p.last_total ?? 'unknown'} (used ${p.use_count}x)`).join('\n')
+    : 'No previous jobs yet.'
+
+  // 4. Call Claude
+  const systemWithContext = [
+    SYSTEM_PROMPT,
+    `\nCURRENT QUOTE STATE:\n${JSON.stringify(session.quote_draft, null, 2)}`,
+    `\nPRICE MEMORY (their past jobs):\n${priceMemoryText}`,
+  ].join('\n')
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 1024,
+    system: systemWithContext,
+    messages: messages.map(m => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    })),
+  })
+
+  const assistantText = response.content
+    .filter(b => b.type === 'text')
+    .map(b => (b as { type: 'text'; text: string }).text)
+    .join('')
+
+  // Append assistant reply to history
+  messages.push({ role: 'assistant', content: assistantText })
+
+  // 5. Detect JSON trigger
+  const jsonMatch = assistantText.match(/\{[\s\S]*"action"\s*:\s*"generate_quote"[\s\S]*\}/)
+
+  if (jsonMatch) {
+    let trigger: QuoteTrigger
+    try {
+      trigger = JSON.parse(jsonMatch[0]) as QuoteTrigger
+    } catch {
+      // Malformed JSON — treat as regular message
+      await saveSession(supabase, session.id, messages, session.quote_draft as Record<string, unknown>)
+      return { type: 'message', text: assistantText }
+    }
+
+    // Calculate totals
+    const lineItems: LineItem[] = trigger.line_items.map(item => ({
+      description: item.description,
+      quantity: item.quantity ?? 1,
+      unit_price: item.unit_price ?? 0,
+      total: item.total ?? (item.quantity ?? 1) * (item.unit_price ?? 0),
+    }))
+
+    const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0)
+    const total = subtotal * (1 + taxRate)
+
+    // Insert quote
+    const { data: quote, error: quoteError } = await supabase
+      .from('quotes')
+      .insert({
+        user_id: userId,
+        customer_name: trigger.customer_name,
+        status: 'draft',
+        line_items: lineItems,
+        subtotal,
+        tax_rate: taxRate,
+        total,
+        notes: null,
+        pdf_url: null,
+        sent_at: null,
+        viewed_at: null,
+        accepted_at: null,
+        customer_id: null,
+      })
+      .select()
+      .single()
+
+    if (quoteError || !quote) throw new Error(`Failed to create quote: ${quoteError?.message}`)
+
+    // Update price memory for each line item
+    await Promise.all(
+      lineItems.map(async item => {
+        const jobType = item.description.toLowerCase().slice(0, 60)
+        const { data: existing } = await supabase
+          .from('price_memory')
+          .select('id, use_count')
+          .eq('user_id', userId)
+          .eq('job_type', jobType)
+          .single()
+
+        if (existing) {
+          await supabase
+            .from('price_memory')
+            .update({ last_total: item.total, use_count: existing.use_count + 1 })
+            .eq('id', existing.id)
+        } else {
+          await supabase.from('price_memory').insert({
+            user_id: userId,
+            job_type: jobType,
+            last_labor: null,
+            last_total: item.total,
+          })
+        }
+      })
+    )
+
+    // Mark session complete
+    await supabase
+      .from('quote_sessions')
+      .update({ state: 'complete', quote_id: quote.id, messages })
+      .eq('id', session.id)
+
+    return { type: 'quote_created', quoteId: quote.id }
+  }
+
+  // 6. Regular message — save updated session
+  await saveSession(supabase, session.id, messages, session.quote_draft as Record<string, unknown>)
+
+  return { type: 'message', text: assistantText }
+}
+
+async function saveSession(
+  supabase: ReturnType<typeof createServiceClient>,
+  sessionId: string,
+  messages: { role: string; content: string }[],
+  quoteDraft: Record<string, unknown>
+) {
+  await supabase
+    .from('quote_sessions')
+    .update({ messages, quote_draft: quoteDraft })
+    .eq('id', sessionId)
+}
