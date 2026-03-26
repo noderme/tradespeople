@@ -1,6 +1,7 @@
 {
   "framework": "nextjs",
-"regions": ["lhr1"],
+  "buildCommand": "npx supabase db push --linked && next build",
+  "regions": ["lhr1"],
   "functions": {
     "app/api/webhooks/**": {
       "maxDuration": 60
