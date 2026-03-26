@@ -4,7 +4,7 @@ const path = require('path')
 
 async function migrate() {
   const password = process.env.SUPABASE_DB_PASSWORD
-  const projectRef = 'ngtyujbqbstapztjbfqf'
+  const projectRef = 'uvaxuteovtfppvenmrvg'
 
   const client = new Client({
     host: `aws-0-eu-west-1.pooler.supabase.com`,
