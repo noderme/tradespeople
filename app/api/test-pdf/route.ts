@@ -6,7 +6,7 @@ type User  = Database['public']['Tables']['users']['Row']
 
 export async function GET() {
   const quote: Quote = {
-    id:            'test-0000-0000-0000-000000000000',
+    id:            'b4e1f9c2-8d3a-4f7e-9b2c-1a3d5e7f9a3f',
     user_id:       'test-user',
     customer_id:   null,
     customer_name: 'John Smith',
