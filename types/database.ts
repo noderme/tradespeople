@@ -28,6 +28,7 @@ export type Database = {
           paddle_subscription_id: string | null
           trade_type: TradeType | null
           default_tax_rate: number
+          currency: string
         }
         Insert: {
           id?: string
@@ -43,6 +44,7 @@ export type Database = {
           paddle_subscription_id?: string | null
           trade_type?: TradeType | null
           default_tax_rate?: number
+          currency?: string
         }
         Update: {
           id?: string
@@ -58,6 +60,7 @@ export type Database = {
           paddle_subscription_id?: string | null
           trade_type?: TradeType | null
           default_tax_rate?: number
+          currency?: string
         }
         Relationships: []
       }

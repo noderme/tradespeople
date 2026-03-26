@@ -23,8 +23,13 @@ function line(page: PDFPage, x1: number, y1: number, x2: number, y2: number) {
   page.drawLine({ start: { x: x1, y: y1 }, end: { x: x2, y: y2 }, thickness: 0.5, color: COL_BORDER })
 }
 
-function fmt(amount: number) {
-  return `£${amount.toFixed(2)}`
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$', GBP: '£', EUR: '€', CAD: 'CA$', AUD: 'A$', NZD: 'NZ$',
+}
+
+function fmt(amount: number, currency = 'USD') {
+  const symbol = CURRENCY_SYMBOLS[currency] ?? '$'
+  return `${symbol}${amount.toFixed(2)}`
 }
 
 function rAlign(page: PDFPage, text: string, rightX: number, y: number, size: number, font: PDFFont, color = COL_BLACK) {
@@ -34,6 +39,7 @@ function rAlign(page: PDFPage, text: string, rightX: number, y: number, size: nu
 
 /** Builds the PDF and returns the raw buffer — no Supabase side effects. */
 export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> {
+  const currency = user.currency ?? 'USD'
   const pdfDoc = await PDFDocument.create()
   const page   = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
 
@@ -139,8 +145,8 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
     const desc = item.description.length > 48 ? item.description.slice(0, 45) + '…' : item.description
     page.drawText(desc,              { x: colDesc + 6,     y: textY, size: 9, font: regular, color: COL_BLACK })
     page.drawText(String(item.quantity), { x: colQty,      y: textY, size: 9, font: regular, color: COL_BLACK })
-    page.drawText(fmt(item.unit_price),  { x: colUnit,     y: textY, size: 9, font: regular, color: COL_BLACK })
-    page.drawText(fmt(item.total),       { x: colTotal,    y: textY, size: 9, font: regular, color: COL_BLACK })
+    page.drawText(fmt(item.unit_price, currency),  { x: colUnit,     y: textY, size: 9, font: regular, color: COL_BLACK })
+    page.drawText(fmt(item.total, currency),       { x: colTotal,    y: textY, size: 9, font: regular, color: COL_BLACK })
 
     y -= rowH
   }
@@ -154,7 +160,7 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
 
   // Subtotal
   page.drawText('Subtotal', { x: labelX, y, size: 10, font: regular, color: COL_GRAY })
-  rAlign(page, fmt(Number(quote.subtotal)), valueX, y, 10, regular)
+  rAlign(page, fmt(Number(quote.subtotal), currency), valueX, y, 10, regular)
   y -= 18
 
   // Tax (only if non-zero)
@@ -163,7 +169,7 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
     const taxAmt   = Number(quote.subtotal) * taxRate
     const taxLabel = `Tax (${(taxRate * 100 % 1 === 0 ? (taxRate * 100).toFixed(0) : (taxRate * 100).toFixed(1))}%)`
     page.drawText(taxLabel, { x: labelX, y, size: 10, font: regular, color: COL_GRAY })
-    rAlign(page, fmt(taxAmt), valueX, y, 10, regular)
+    rAlign(page, fmt(taxAmt, currency), valueX, y, 10, regular)
     y -= 18
   }
 
@@ -172,7 +178,7 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
 
   // Total
   page.drawText('TOTAL', { x: labelX, y, size: 14, font: bold, color: COL_BLACK })
-  rAlign(page, fmt(Number(quote.total)), valueX, y, 14, bold, COL_ORANGE)
+  rAlign(page, fmt(Number(quote.total), currency), valueX, y, 14, bold, COL_ORANGE)
 
   // ── FOOTER ───────────────────────────────────────────────────────────────────
   const footerY = MARGIN + 36

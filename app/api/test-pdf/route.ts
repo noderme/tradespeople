@@ -41,6 +41,7 @@ export async function GET() {
     paddle_subscription_id: null,
     trade_type:             'plumber',
     default_tax_rate:       0,
+    currency:               'USD',
   }
 
   const buffer = await buildPdfBuffer(quote, user)
