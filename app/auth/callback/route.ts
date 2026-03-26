@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   // Check if user profile row already exists
   const { data: existing } = await supabase
     .from('users')
-    .select('id, trade_type')
+    .select('*')
     .eq('id', user.id)
     .single()
 
