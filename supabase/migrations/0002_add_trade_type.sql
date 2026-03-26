@@ -10,15 +10,21 @@ VALUES ('logos', 'logos', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Allow authenticated users to upload to their own folder
-CREATE POLICY IF NOT EXISTS logos_upload ON storage.objects
-  FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'logos' AND (storage.foldername(name))[1] = auth.uid()::text);
+DO $$ BEGIN
+  CREATE POLICY logos_upload ON storage.objects
+    FOR INSERT TO authenticated
+    WITH CHECK (bucket_id = 'logos' AND (storage.foldername(name))[1] = auth.uid()::text);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Allow update/replace of own logo
-CREATE POLICY IF NOT EXISTS logos_update ON storage.objects
-  FOR UPDATE TO authenticated
-  USING (bucket_id = 'logos' AND (storage.foldername(name))[1] = auth.uid()::text);
+DO $$ BEGIN
+  CREATE POLICY logos_update ON storage.objects
+    FOR UPDATE TO authenticated
+    USING (bucket_id = 'logos' AND (storage.foldername(name))[1] = auth.uid()::text);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 -- Allow public read
-CREATE POLICY IF NOT EXISTS logos_read ON storage.objects
-  FOR SELECT USING (bucket_id = 'logos');
+DO $$ BEGIN
+  CREATE POLICY logos_read ON storage.objects
+    FOR SELECT USING (bucket_id = 'logos');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
