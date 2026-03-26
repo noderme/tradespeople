@@ -7,10 +7,10 @@ async function migrate() {
   const projectRef = 'ngtyujbqbstapztjbfqf'
 
   const client = new Client({
-    host: `db.${projectRef}.supabase.co`,
-    port: 5432,
+    host: `aws-0-eu-west-2.pooler.supabase.com`,
+    port: 6543,
     database: 'postgres',
-    user: 'postgres',
+    user: `postgres.${projectRef}`,
     password,
     ssl: { rejectUnauthorized: false },
   })
