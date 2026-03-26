@@ -3,7 +3,18 @@ const fs = require('fs')
 const path = require('path')
 
 async function migrate() {
-  const client = new Client({ connectionString: process.env.POSTGRES_URL })
+  const password = process.env.SUPABASE_DB_PASSWORD
+  const projectRef = 'ngtyujbqbstapztjbfqf'
+
+  const client = new Client({
+    host: `db.${projectRef}.supabase.co`,
+    port: 5432,
+    database: 'postgres',
+    user: 'postgres',
+    password,
+    ssl: { rejectUnauthorized: false },
+  })
+
   await client.connect()
 
   const migrationsDir = path.join(__dirname, '../supabase/migrations')
