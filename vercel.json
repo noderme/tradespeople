@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx supabase db push --linked && next build",
+  "buildCommand": "npx supabase db push --project-ref uvaxuteovtfppvenmrvg && next build",
   "regions": ["lhr1"],
   "functions": {
     "app/api/webhooks/**": {
