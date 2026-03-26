@@ -32,7 +32,8 @@ function rAlign(page: PDFPage, text: string, rightX: number, y: number, size: nu
   page.drawText(text, { x: rightX - w, y, size, font, color })
 }
 
-export async function generateQuotePdf(quote: Quote, user: User): Promise<Buffer> {
+/** Builds the PDF and returns the raw buffer — no Supabase side effects. */
+export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create()
   const page   = pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT])
 
@@ -185,10 +186,13 @@ export async function generateQuotePdf(quote: Quote, user: User): Promise<Buffer
   const contact = `${user.whatsapp_number}  |  ${user.email}`
   rAlign(page, contact, PAGE_WIDTH - MARGIN, footerY, 9, regular, COL_GRAY)
 
-  // ── SAVE & UPLOAD ─────────────────────────────────────────────────────────────
   const pdfBytes = await pdfDoc.save()
-  const buffer   = Buffer.from(pdfBytes)
+  return Buffer.from(pdfBytes)
+}
 
+/** Generates the PDF, uploads to Supabase Storage, updates the quote row, returns the buffer. */
+export async function generateQuotePdf(quote: Quote, user: User): Promise<Buffer> {
+  const buffer   = await buildPdfBuffer(quote, user)
   const supabase = createServiceClient()
   const filename = `quote-${quote.id}.pdf`
 
