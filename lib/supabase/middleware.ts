@@ -24,13 +24,12 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh session — must not call supabase.auth.getUser() after this
   const { data: { user } } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
 
   // Redirect unauthenticated users away from protected routes
-  const protectedPrefixes = ['/dashboard', '/settings', '/quotes']
+  const protectedPrefixes = ['/dashboard', '/settings', '/billing', '/onboarding', '/quotes']
   const isProtected = protectedPrefixes.some(p => pathname.startsWith(p))
 
   if (!user && isProtected) {

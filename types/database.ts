@@ -1,6 +1,7 @@
 export type Plan = 'trial' | 'starter' | 'pro' | 'team'
 export type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'declined'
 export type SessionState = 'collecting' | 'reviewing' | 'customer_info' | 'sending' | 'complete'
+export type TradeType = 'plumber' | 'electrician' | 'hvac' | 'roofer' | 'other'
 
 export interface LineItem {
   description: string
@@ -25,6 +26,8 @@ export interface Database {
           trial_ends_at: string | null
           paddle_customer_id: string | null
           paddle_subscription_id: string | null
+          trade_type: TradeType | null
+          default_tax_rate: number
         }
         Insert: Omit<Database['public']['Tables']['users']['Row'], 'id' | 'created_at'> & {
           id?: string
