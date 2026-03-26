@@ -14,7 +14,7 @@ export async function updateProfileAction(formData: FormData) {
 
   const { error } = await supabase
     .from('users')
-    .update({ business_name, trade_type, default_tax_rate })
+    .update({ business_name, trade_type: trade_type as import('@/types/database').TradeType, default_tax_rate })
     .eq('id', user.id)
 
   if (error) throw new Error(error.message)

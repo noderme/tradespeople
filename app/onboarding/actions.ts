@@ -33,7 +33,7 @@ export async function saveTradeTypeAction(trade_type: string): Promise<void> {
 
   const { error } = await supabase
     .from('users')
-    .update({ trade_type })
+    .update({ trade_type: trade_type as import('@/types/database').TradeType })
     .eq('id', user.id)
 
   if (error) throw new Error(error.message)
