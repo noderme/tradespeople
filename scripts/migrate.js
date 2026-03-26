@@ -43,4 +43,4 @@ async function migrate() {
   await client.end()
 }
 
-migrate().catch(err => { console.error(err); process.exit(1) })
+migrate().catch(err => { console.error('Migration failed:', err.message, err.code, err.detail); process.exit(1) })
