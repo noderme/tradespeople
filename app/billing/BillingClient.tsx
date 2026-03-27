@@ -20,14 +20,14 @@ const PLANS: {
     label: 'Starter',
     price: 29,
     priceEnvKey: 'NEXT_PUBLIC_PADDLE_STARTER_PRICE_ID',
-    features: ['Up to 10 quotes/month', 'WhatsApp bot', 'PDF generation', 'Email support'],
+    features: ['Up to 10 quotes/month', 'PDF generation', 'Email support'],
   },
   {
     id: 'pro',
     label: 'Pro',
     price: 79,
     priceEnvKey: 'NEXT_PUBLIC_PADDLE_PRO_PRICE_ID',
-    features: ['Unlimited quotes', 'WhatsApp bot', 'PDF generation', 'Custom branding', 'Priority support'],
+    features: ['Unlimited quotes', 'PDF generation', 'Custom branding', 'Priority support'],
     highlight: true,
   },
   {
@@ -54,7 +54,7 @@ export function BillingClient({ userId, plan, isSubscribed, trialDaysLeft, succe
 
   useEffect(() => {
     initializePaddle({
-      environment: 'sandbox',
+      environment: 'production',
       token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
     }).then(p => setPaddle(p))
   }, [])
