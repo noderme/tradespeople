@@ -1,7 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+import type { Database } from '@/types/database'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
 
@@ -9,7 +10,29 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=no_code`)
   }
 
-  const supabase = createClient()
+  // Build the redirect response up front so we can attach session cookies to it.
+  // The `next/headers` cookie store used by createClient() does NOT propagate
+  // cookies onto a NextResponse.redirect() — they get dropped, leaving the
+  // browser sessionless and triggering an infinite redirect loop.
+  const response = NextResponse.redirect(`${origin}/dashboard`)
+
+  const supabase = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
   const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
 
   if (error || !user) {
@@ -19,14 +42,14 @@ export async function GET(request: Request) {
   // Check if user profile row already exists
   const { data: existing } = await supabase
     .from('users')
-    .select('*')
+    .select('id, trade_type')
     .eq('id', user.id)
     .single()
 
   if (existing) {
-    // Returning user — send to dashboard or onboarding if not complete
     const dest = existing.trade_type ? '/dashboard' : '/onboarding'
-    return NextResponse.redirect(`${origin}${dest}`)
+    response.headers.set('Location', `${origin}${dest}`)
+    return response
   }
 
   // New user — create profile row from metadata set during signup
@@ -46,5 +69,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=profile_failed`)
   }
 
-  return NextResponse.redirect(`${origin}/onboarding`)
+  response.headers.set('Location', `${origin}/onboarding`)
+  return response
 }
