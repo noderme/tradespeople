@@ -32,7 +32,7 @@ const PLANS: { id: Plan; label: string; price: number; priceEnvKey: string; feat
 export default async function BillingPage({
   searchParams,
 }: {
-  searchParams: { success?: string }
+  searchParams: { success?: string; reason?: string }
 }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -63,6 +63,12 @@ export default async function BillingPage({
         {searchParams.success && (
           <div className="bg-green-950 border border-green-800 text-green-300 px-4 py-3 text-sm mb-6 font-bold uppercase tracking-wider">
             Subscription activated. Welcome aboard.
+          </div>
+        )}
+
+        {searchParams.reason === 'canceled' && (
+          <div className="bg-red-950 border border-red-800 text-red-300 px-4 py-3 text-sm mb-6 font-bold uppercase tracking-wider">
+            Your subscription has ended. Renew to continue quoting.
           </div>
         )}
 

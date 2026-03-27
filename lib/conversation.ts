@@ -64,6 +64,21 @@ async function checkPlanAccess(userId: string): Promise<string | null> {
     if (expired) {
       return 'Your free trial has expired. Subscribe to continue sending quotes.'
     }
+
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const { count } = await supabase
+      .from('quotes')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString())
+
+    if ((count ?? 0) >= 10) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+      return `You've used all 10 trial quotes. Upgrade to keep quoting: ${appUrl}/billing`
+    }
     return null
   }
 
