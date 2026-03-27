@@ -48,8 +48,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content="TradeQuote" />
-        <link rel="icon" href="/icon-192.png" type="image/png" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="icon" href="/icon-192.png?v=2" type="image/png" />
+        <link rel="apple-touch-icon" href="/icon-192.png?v=2" />
       </head>
       <body className={`${barlow.variable} ${barlowCondensed.variable} font-sans antialiased bg-neutral-950 text-neutral-50`}>
         <Suspense fallback={null}>
