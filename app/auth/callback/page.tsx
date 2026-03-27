@@ -1,59 +1,75 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function AuthCallbackPage() {
+function AuthCallback() {
   const [error, setError] = useState<string | null>(null)
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     const supabase = createClient()
+    const isSignup = searchParams.get('signup') === '1'
+    console.log('isSignup:', isSignup)
 
-    // onAuthStateChange fires reliably once the browser client processes
-    // the #access_token hash from the magic link URL.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return
       subscription.unsubscribe()
 
       if (!session) {
+        console.log('No session — redirecting to login')
         window.location.href = '/login?error=' + encodeURIComponent('Authentication failed. Please try again.')
         return
       }
 
-      // Check if profile exists
+      const { data: { user } } = await supabase.auth.getUser()
+      console.log('User:', user?.id)
+
+      if (!user) {
+        window.location.href = '/login?error=' + encodeURIComponent('Authentication failed. Please try again.')
+        return
+      }
+
       const { data: profile } = await supabase
         .from('users')
         .select('id, trade_type')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single()
 
-      if (profile) {
-        window.location.href = profile.trade_type ? '/dashboard' : '/onboarding'
+      console.log('Profile:', profile)
+
+      if (isSignup || !profile) {
+        if (!profile) {
+          const meta = user.user_metadata ?? {}
+          const { error: insertError } = await supabase.from('users').insert({
+            id: user.id,
+            email: user.email!,
+            full_name: meta.full_name ?? '',
+            business_name: meta.business_name ?? '',
+            plan: 'trial',
+            trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          })
+
+          if (insertError) {
+            console.error('Profile insert error:', insertError.message)
+            setError('Failed to create profile. Please try again.')
+            return
+          }
+        }
+
+        console.log('Redirecting to: /onboarding')
+        window.location.href = '/onboarding'
         return
       }
 
-      // No profile — create it
-      const meta = session.user.user_metadata ?? {}
-      const { error: insertError } = await supabase.from('users').insert({
-        id: session.user.id,
-        email: session.user.email!,
-        full_name: meta.full_name ?? '',
-        business_name: meta.business_name ?? '',
-        plan: 'trial',
-        trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      })
-
-      if (insertError) {
-        console.error('Profile insert error:', insertError.message)
-        setError('Failed to create profile. Please try again.')
-        return
-      }
-
-      window.location.href = '/onboarding'
+      const destination = profile.trade_type ? '/dashboard' : '/onboarding'
+      console.log('Redirecting to:', destination)
+      window.location.href = destination
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [searchParams])
 
   if (error) {
     return (
@@ -72,5 +88,17 @@ export default function AuthCallbackPage() {
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
       <div className="text-neutral-400 text-sm uppercase tracking-widest">Signing you in…</div>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
+        <div className="text-neutral-400 text-sm uppercase tracking-widest">Signing you in…</div>
+      </div>
+    }>
+      <AuthCallback />
+    </Suspense>
   )
 }
