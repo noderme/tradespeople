@@ -31,7 +31,6 @@ export function ChatInterface({ userId }: { userId: string }) {
   const [stage,       setStage]       = useState<Stage>('chatting')
   const [quoteReady,  setQuoteReady]  = useState<QuoteReady | null>(null)
   const [email,       setEmail]       = useState('')
-  const [copied,      setCopied]      = useState(false)
   const [sendingEmail, setSendingEmail] = useState(false)
   const [emailError,   setEmailError]   = useState<string | null>(null)
   const [emailSent,    setEmailSent]    = useState(false)
@@ -115,18 +114,6 @@ export function ChatInterface({ userId }: { userId: string }) {
     setStage('sent')
   }
 
-  function quoteAcceptUrl() {
-    if (!quoteReady) return ''
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
-    return `${base}/quote/${quoteReady.quoteId}`
-  }
-
-  async function copyLink() {
-    await navigator.clipboard.writeText(quoteAcceptUrl())
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   async function handleEmailSend() {
     if (!quoteReady || !email.trim()) return
     setSendingEmail(true)
@@ -154,7 +141,6 @@ export function ChatInterface({ userId }: { userId: string }) {
     setStage('chatting')
     setQuoteReady(null)
     setEmail('')
-    setCopied(false)
     setSendingEmail(false)
     setEmailError(null)
     setEmailSent(false)
@@ -268,21 +254,6 @@ export function ChatInterface({ userId }: { userId: string }) {
               {emailError && (
                 <div className="text-red-400 text-xs">{emailError}</div>
               )}
-
-              {/* Copy link row */}
-              <div className="flex gap-2">
-                <input
-                  readOnly
-                  value={quoteAcceptUrl()}
-                  className="flex-1 bg-neutral-900 text-neutral-300 text-xs px-3 py-2 truncate focus:outline-none"
-                />
-                <button
-                  onClick={copyLink}
-                  className="bg-neutral-700 hover:bg-neutral-600 text-neutral-100 text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
-                >
-                  {copied ? 'Copied!' : 'Copy'}
-                </button>
-              </div>
 
               <button
                 onClick={startOver}
