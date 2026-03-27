@@ -3,22 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Footer } from '@/components/Footer'
 
-export default async function HomePage({
-  searchParams,
-}: {
-  searchParams: { code?: string; token_hash?: string; type?: string; error?: string; error_description?: string }
-}) {
-  // Supabase sometimes redirects to Site URL root instead of /auth/callback — forward it
-  if (searchParams.error || searchParams.error_description) {
-    const msg = searchParams.error_description || searchParams.error || 'Authentication failed'
-    redirect(`/login?error=${encodeURIComponent(msg)}`)
-  }
-  if (searchParams.code || searchParams.token_hash) {
-    const params = new URLSearchParams()
-    Object.entries(searchParams).forEach(([k, v]) => { if (v) params.set(k, v) })
-    redirect(`/auth/callback?${params.toString()}`)
-  }
-
+export default async function HomePage() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user) redirect('/dashboard')
