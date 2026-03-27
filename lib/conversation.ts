@@ -158,32 +158,71 @@ export async function handleConversation(
     content: m.content,
   }))
 
-  let response
-  for (let attempt = 0; attempt < 3; attempt++) {
+  async function tryClaudeModel(model: string): Promise<string | null> {
     try {
-      response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-6',
+      const res = await anthropic.messages.create({
+        model,
         max_tokens: 1024,
         system: systemWithContext,
         messages: claudeMessages,
       })
-      break
+      return res.content.filter(b => b.type === 'text').map(b => (b as { type: 'text'; text: string }).text).join('')
     } catch (err: unknown) {
       const status = (err as { status?: number }).status
-      if (status === 529 && attempt < 2) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
-        continue
-      }
+      if (status && status >= 500) return null
       throw err
     }
   }
-  if (!response) throw new Error('Claude API unavailable after retries')
 
-  const assistantText = response.content
-    .filter(b => b.type === 'text')
-    .map(b => (b as { type: 'text'; text: string }).text)
-    .join('')
+  async function tryOpenAI(): Promise<string | null> {
+    if (!process.env.OPENAI_API_KEY) return null
+    try {
+      const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemWithContext },
+            ...claudeMessages,
+          ],
+          max_tokens: 500,
+        }),
+      })
+      if (!res.ok) return null
+      const data = await res.json() as { choices: { message: { content: string } }[] }
+      return data.choices?.[0]?.message?.content ?? null
+    } catch {
+      return null
+    }
+  }
 
+  let assistantText: string | null = null
+  let modelUsed = ''
+
+  assistantText = await tryClaudeModel('claude-sonnet-4-6')
+  if (assistantText !== null) {
+    modelUsed = 'claude-sonnet-4-6'
+  } else {
+    assistantText = await tryClaudeModel('claude-haiku-4-5-20251001')
+    if (assistantText !== null) {
+      modelUsed = 'claude-haiku-4-5-20251001'
+    } else {
+      assistantText = await tryOpenAI()
+      if (assistantText !== null) {
+        modelUsed = 'gpt-4o-mini'
+      }
+    }
+  }
+
+  if (!assistantText) {
+    return { type: 'message', text: "I'm having a moment. Try again in 30 seconds." }
+  }
+
+  console.log('Model used:', modelUsed)
   console.log('Claude raw response:', assistantText)
   console.log('Action detected:', assistantText.includes('generate_quote'))
   console.log('Current session state:', session.state)
