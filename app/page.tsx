@@ -3,7 +3,23 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Footer } from '@/components/Footer'
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: { code?: string; token_hash?: string; type?: string; error?: string; error_description?: string }
+}) {
+  // Supabase sometimes redirects to Site URL root instead of /auth/callback — forward it
+  if (searchParams.error || searchParams.error_description) {
+    const msg = searchParams.error_description || searchParams.error || 'Authentication failed'
+    redirect(`/login?error=${encodeURIComponent(msg)}`)
+  }
+  if (searchParams.code) {
+    redirect(`/auth/callback?code=${searchParams.code}`)
+  }
+  if (searchParams.token_hash && searchParams.type) {
+    redirect(`/auth/callback?token_hash=${searchParams.token_hash}&type=${searchParams.type}`)
+  }
+
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user) redirect('/dashboard')
@@ -127,13 +143,13 @@ export default async function HomePage() {
               {
                 label: 'Starter',
                 price: 29,
-                features: ['10 quotes/month', 'PDF generation', 'Email delivery', 'WhatsApp bot'],
+                features: ['10 quotes/month', 'PDF generation', 'Email delivery', 'Custom branding'],
                 highlight: false,
               },
               {
                 label: 'Pro',
                 price: 79,
-                features: ['Unlimited quotes', 'PDF generation', 'Email delivery', 'WhatsApp bot', 'Custom branding', 'Priority support'],
+                features: ['Unlimited quotes', 'PDF generation', 'Email delivery', 'Custom branding', 'Priority support'],
                 highlight: true,
               },
               {

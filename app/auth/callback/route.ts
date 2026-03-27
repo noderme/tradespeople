@@ -6,12 +6,18 @@ import type { Database } from '@/types/database'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
 
+  // Supabase sends ?error= when the link is expired, already used, or denied
+  const supabaseError = searchParams.get('error_description') || searchParams.get('error')
+  if (supabaseError) {
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(supabaseError)}`)
+  }
+
   const code        = searchParams.get('code')         // OAuth / PKCE flow
   const token_hash  = searchParams.get('token_hash')   // Magic link / OTP flow
   const type        = searchParams.get('type') as EmailOtpType | null
 
   if (!code && !token_hash) {
-    return NextResponse.redirect(`${origin}/login?error=no_code`)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Invalid or expired link. Please request a new one.')}`)
   }
 
   // Build redirect response first so session cookies attach to it
