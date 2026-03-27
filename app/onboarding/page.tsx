@@ -94,6 +94,7 @@ export default function OnboardingPage() {
                 onClick={() => fileRef.current?.click()}
               >
                 {logoPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={logoPreview} alt="Logo preview" className="max-h-24 mx-auto object-contain" />
                 ) : (
                   <div>

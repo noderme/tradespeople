@@ -71,6 +71,7 @@ export function SettingsForm({ profile }: { profile: UserRow }) {
             onClick={() => fileRef.current?.click()}
           >
             {logoPreview
+              // eslint-disable-next-line @next/next/no-img-element
               ? <img src={logoPreview} alt="Logo" className="w-full h-full object-contain" />
               : <span className="text-neutral-600 text-2xl">+</span>
             }

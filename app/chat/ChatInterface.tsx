@@ -17,7 +17,7 @@ type Stage = 'chatting' | 'quote_ready' | 'sending' | 'sent'
 
 const WELCOME = "Hey! Describe your first job and I'll generate a PDF quote in seconds."
 
-export function ChatInterface({ userId: _userId }: { userId: string }) {
+export function ChatInterface(_props: { userId: string }) {
   const threadId  = useRef(typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36)).current
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef  = useRef<HTMLTextAreaElement>(null)
