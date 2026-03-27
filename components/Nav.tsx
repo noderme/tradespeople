@@ -9,7 +9,7 @@ async function signOut() {
   redirect('/login')
 }
 
-export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'billing' }) {
+export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'billing' | 'chat' }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -43,6 +43,7 @@ export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'bil
           </Link>
           <div className="hidden sm:flex items-center gap-6">
             {navLink('/dashboard', 'Dashboard', 'dashboard')}
+            {navLink('/chat', 'New Quote', 'chat')}
             {navLink('/settings', 'Settings', 'settings')}
             {navLink('/billing', 'Billing', 'billing')}
           </div>
