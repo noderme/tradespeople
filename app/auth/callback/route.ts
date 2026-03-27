@@ -5,6 +5,8 @@ import type { Database } from '@/types/database'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
+  console.log('Callback URL:', request.url)
+  console.log('Has signup param:', searchParams.get('signup'))
 
   // Supabase sends ?error= when the link is expired, already used, or denied
   const supabaseError = searchParams.get('error_description') || searchParams.get('error')

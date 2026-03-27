@@ -23,10 +23,12 @@ export default function SignupPage() {
     setError(null)
 
     const supabase = createClient()
+    const emailRedirectTo = `${window.location.origin}/auth/callback?signup=1`
+    console.log('emailRedirectTo:', emailRedirectTo)
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?signup=1`,
+        emailRedirectTo,
         data: {
           full_name: fullName.trim(),
           business_name: businessName.trim(),
