@@ -13,15 +13,18 @@ function twiml(message: string, mediaUrl?: string) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
 
-  const body = mediaUrl
-    ? `${escaped}<Media>${mediaUrl}</Media>`
-    : escaped
+  const media = mediaUrl ? `\n      <Media>${mediaUrl}</Media>` : ''
 
   console.log('Returning TwiML:', message)
 
   return new Response(
-    `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${body}</Message></Response>`,
-    { headers: { 'Content-Type': 'text/xml' }, status: 200 }
+    `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>
+    <Body>${escaped}</Body>${media}
+  </Message>
+</Response>`,
+    { status: 200, headers: { 'Content-Type': 'text/xml; charset=utf-8' } }
   )
 }
 
@@ -32,8 +35,8 @@ export async function POST(request: Request) {
 
   if (!from || !bodyText) {
     return new Response(
-      `<?xml version="1.0" encoding="UTF-8"?><Response/>`,
-      { headers: { 'Content-Type': 'text/xml' }, status: 200 }
+      `<?xml version="1.0" encoding="UTF-8"?>\n<Response/>`,
+      { status: 200, headers: { 'Content-Type': 'text/xml; charset=utf-8' } }
     )
   }
 
