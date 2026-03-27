@@ -69,20 +69,6 @@ export default function SignupPage({
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
-                WhatsApp Number
-              </label>
-              <input
-                name="whatsapp_number"
-                type="tel"
-                required
-                placeholder="+447911123456"
-                className="w-full px-4 py-3 text-base"
-              />
-              <p className="text-neutral-600 text-xs mt-1">Include country code, e.g. +44 or +1</p>
-            </div>
-
             <button
               type="submit"
               className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors mt-2"

@@ -20,7 +20,7 @@ export type Database = {
           email: string
           full_name: string
           business_name: string
-          whatsapp_number: string
+          whatsapp_number: string | null
           logo_url: string | null
           plan: Plan
           trial_ends_at: string | null
@@ -38,7 +38,7 @@ export type Database = {
           email: string
           full_name: string
           business_name: string
-          whatsapp_number: string
+          whatsapp_number?: string | null
           logo_url?: string | null
           plan?: Plan
           trial_ends_at?: string | null

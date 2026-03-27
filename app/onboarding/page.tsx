@@ -21,8 +21,6 @@ export default function OnboardingPage() {
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_PHONE_NUMBER_ID ?? ''
-
   async function handleLogoStep(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
@@ -44,7 +42,7 @@ export default function OnboardingPage() {
     setError(null)
     try {
       await saveTradeTypeAction(selectedTrade)
-      setStep(3)
+      router.push('/dashboard')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Save failed')
     } finally {
@@ -59,7 +57,7 @@ export default function OnboardingPage() {
           TRADEQUOTE
         </span>
         <div className="flex gap-2">
-          {[1, 2, 3].map(s => (
+          {[1, 2].map(s => (
             <div
               key={s}
               className={`w-8 h-1 ${s <= step ? 'bg-orange-500' : 'bg-neutral-700'}`}
@@ -81,7 +79,7 @@ export default function OnboardingPage() {
           {step === 1 && (
             <form onSubmit={handleLogoStep}>
               <div className="mb-10">
-                <div className="text-neutral-500 text-xs uppercase tracking-widest mb-2">Step 1 of 3</div>
+                <div className="text-neutral-500 text-xs uppercase tracking-widest mb-2">Step 1 of 2</div>
                 <h1 className="font-display font-bold text-4xl uppercase tracking-tight mb-2">
                   ADD YOUR<br />
                   <span className="text-orange-500">LOGO</span>
@@ -141,7 +139,7 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div>
               <div className="mb-10">
-                <div className="text-neutral-500 text-xs uppercase tracking-widest mb-2">Step 2 of 3</div>
+                <div className="text-neutral-500 text-xs uppercase tracking-widest mb-2">Step 2 of 2</div>
                 <h1 className="font-display font-bold text-4xl uppercase tracking-tight mb-2">
                   WHAT&apos;S YOUR<br />
                   <span className="text-orange-500">TRADE?</span>
@@ -170,46 +168,7 @@ export default function OnboardingPage() {
                 disabled={!selectedTrade || loading}
                 className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors disabled:opacity-50"
               >
-                {loading ? 'Saving...' : 'Continue →'}
-              </button>
-            </div>
-          )}
-
-          {/* Step 3: Ready */}
-          {step === 3 && (
-            <div className="text-center">
-              <div className="mb-10">
-                <div className="text-neutral-500 text-xs uppercase tracking-widest mb-2">Step 3 of 3</div>
-                <h1 className="font-display font-bold text-5xl uppercase tracking-tight mb-2">
-                  YOU&apos;RE<br />
-                  <span className="text-orange-500">READY.</span>
-                </h1>
-                <p className="text-neutral-400 text-lg">
-                  Message your bot on WhatsApp to start quoting.
-                </p>
-              </div>
-
-              <div className="bg-neutral-900 border border-neutral-800 p-6 mb-8 text-left">
-                <div className="text-xs uppercase tracking-widest text-neutral-500 mb-2">Your WhatsApp Bot</div>
-                <div className="font-mono text-orange-500 text-lg break-all">
-                  +{whatsappNumber}
-                </div>
-              </div>
-
-              <a
-                href={`https://wa.me/${whatsappNumber}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors mb-4 text-center"
-              >
-                Message Your Bot Now →
-              </a>
-
-              <button
-                onClick={() => router.push('/dashboard')}
-                className="w-full border border-neutral-700 text-neutral-400 font-bold uppercase tracking-wider py-4 hover:border-neutral-500 hover:text-neutral-200 transition-colors"
-              >
-                Go to Dashboard
+                {loading ? 'Setting up...' : 'Go to Dashboard →'}
               </button>
             </div>
           )}

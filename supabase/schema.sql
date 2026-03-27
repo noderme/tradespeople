@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
   email                  TEXT UNIQUE NOT NULL,
   full_name              TEXT NOT NULL,
   business_name          TEXT NOT NULL,
-  whatsapp_number        TEXT UNIQUE NOT NULL,
+  whatsapp_number        TEXT UNIQUE,
   logo_url               TEXT,
   plan                   TEXT NOT NULL DEFAULT 'trial'
                            CHECK (plan IN ('trial','starter','pro','team','canceled')),

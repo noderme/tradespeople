@@ -59,7 +59,6 @@ export async function GET(request: NextRequest) {
     email: user.email!,
     full_name: meta.full_name ?? '',
     business_name: meta.business_name ?? '',
-    whatsapp_number: meta.whatsapp_number ?? '',
     plan: 'trial',
     trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   })

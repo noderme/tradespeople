@@ -132,19 +132,6 @@ export function SettingsForm({ profile }: { profile: UserRow }) {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
-              WhatsApp Number
-            </label>
-            <input
-              type="text"
-              value={profile.whatsapp_number}
-              readOnly
-              className="w-full px-4 py-3 opacity-50 cursor-not-allowed"
-            />
-            <p className="text-neutral-600 text-xs mt-1">Cannot be changed after signup</p>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
               Business Phone
             </label>
             <input
@@ -196,6 +183,37 @@ export function SettingsForm({ profile }: { profile: UserRow }) {
           {saving ? <><Spinner className="mr-2" />Saving…</> : 'Save Changes'}
         </button>
       </form>
+
+      {/* WhatsApp Coming Soon */}
+      <section className="bg-neutral-900 border border-neutral-800 p-6 space-y-4 opacity-60">
+        <div className="flex items-center gap-3">
+          <h2 className="font-bold uppercase tracking-widest text-xs text-neutral-500">WhatsApp Quoting</h2>
+          <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 border border-neutral-600 text-neutral-500">
+            Coming Soon
+          </span>
+        </div>
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
+            WhatsApp Number
+          </label>
+          <input
+            type="tel"
+            disabled
+            placeholder="+447911123456"
+            className="w-full px-4 py-3 cursor-not-allowed"
+          />
+          <p className="text-neutral-600 text-xs mt-1">
+            Add your number to receive and create quotes directly via WhatsApp
+          </p>
+        </div>
+        <button
+          type="button"
+          disabled
+          className="w-full border border-neutral-700 text-neutral-600 font-bold uppercase tracking-wider py-3 cursor-not-allowed"
+        >
+          Save WhatsApp Number
+        </button>
+      </section>
     </div>
   )
 }
