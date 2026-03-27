@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { sendWhatsAppMessage } from '@/lib/whatsapp'
 
 export async function uploadLogoAction(formData: FormData): Promise<{ logo_url: string | null }> {
   const supabase = createClient()
@@ -31,10 +32,19 @@ export async function saveTradeTypeAction(trade_type: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const { error } = await supabase
+  const { data: profile, error } = await supabase
     .from('users')
     .update({ trade_type: trade_type as import('@/types/database').TradeType })
     .eq('id', user.id)
+    .select('whatsapp_number')
+    .single()
 
   if (error) throw new Error(error.message)
+
+  if (profile?.whatsapp_number) {
+    await sendWhatsAppMessage(
+      profile.whatsapp_number,
+      `Welcome to TradeQuote! 🔧\n\nYou're all set. Just message me here anytime to create a quote.\n\nTry it now — describe your first job and I'll generate a PDF quote in seconds.`
+    )
+  }
 }
