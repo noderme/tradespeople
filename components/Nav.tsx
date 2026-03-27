@@ -14,7 +14,7 @@ export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'bil
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: profile } = user
-    ? await supabase.from('users').select('business_name, plan, trial_ends_at').eq('id', user.id).single()
+    ? await supabase.from('users').select('*').eq('id', user.id).single()
     : { data: null }
 
   const trialDaysLeft = profile?.trial_ends_at

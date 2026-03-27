@@ -1,4 +1,4 @@
-export type Plan = 'trial' | 'starter' | 'pro' | 'team'
+export type Plan = 'trial' | 'starter' | 'pro' | 'team' | 'canceled'
 export type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'declined'
 export type SessionState = 'collecting' | 'reviewing' | 'customer_info' | 'sending' | 'complete'
 export type TradeType = 'plumber' | 'electrician' | 'hvac' | 'roofer' | 'other'
@@ -24,8 +24,8 @@ export type Database = {
           logo_url: string | null
           plan: Plan
           trial_ends_at: string | null
-          paddle_customer_id: string | null
-          paddle_subscription_id: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           trade_type: TradeType | null
           default_tax_rate: number
           currency: string
@@ -40,8 +40,8 @@ export type Database = {
           logo_url?: string | null
           plan?: Plan
           trial_ends_at?: string | null
-          paddle_customer_id?: string | null
-          paddle_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           trade_type?: TradeType | null
           default_tax_rate?: number
           currency?: string
@@ -56,8 +56,8 @@ export type Database = {
           logo_url?: string | null
           plan?: Plan
           trial_ends_at?: string | null
-          paddle_customer_id?: string | null
-          paddle_subscription_id?: string | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           trade_type?: TradeType | null
           default_tax_rate?: number
           currency?: string

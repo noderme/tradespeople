@@ -31,12 +31,60 @@ RULES:
 9. Once you have customer name, output ONLY this JSON (no other text):
    {"action":"generate_quote","line_items":[...],"customer_name":"...","subtotal":0,"total":0}`
 
+async function checkPlanAccess(userId: string): Promise<string | null> {
+  const supabase = createServiceClient()
+
+  const { data: user } = await supabase
+    .from('users')
+    .select('plan, trial_ends_at')
+    .eq('id', userId)
+    .single()
+
+  if (!user) return 'Account not found.'
+
+  if (user.plan === 'canceled') {
+    return 'Your subscription has ended. Reactivate at your billing page to continue quoting.'
+  }
+
+  if (user.plan === 'trial') {
+    const expired = user.trial_ends_at && new Date(user.trial_ends_at) < new Date()
+    if (expired) {
+      return 'Your free trial has expired. Subscribe to continue sending quotes.'
+    }
+    return null
+  }
+
+  if (user.plan === 'starter') {
+    const startOfMonth = new Date()
+    startOfMonth.setDate(1)
+    startOfMonth.setHours(0, 0, 0, 0)
+
+    const { count } = await supabase
+      .from('quotes')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .gte('created_at', startOfMonth.toISOString())
+
+    if ((count ?? 0) >= 10) {
+      return "You've reached your 10 quotes/month limit on the Starter plan. Upgrade to Pro for unlimited quotes."
+    }
+    return null
+  }
+
+  // pro / team — unlimited
+  return null
+}
+
 export async function handleConversation(
   userId: string,
   message: string,
   threadId: string
 ): Promise<ConversationResult> {
   const supabase = createServiceClient()
+
+  // 0. Plan access check
+  const gateMessage = await checkPlanAccess(userId)
+  if (gateMessage) return { type: 'message', text: gateMessage }
 
   // 1. Load or create quote_session
   let { data: session } = await supabase
