@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Nav } from '@/components/Nav'
+import { Footer } from '@/components/Footer'
 import { QuotesTable } from './QuotesTable'
 
 function formatCurrency(amount: number, currency: string) {
@@ -109,6 +110,7 @@ export default async function DashboardPage() {
           <QuotesTable quotes={recentQuotes} currency={currency} />
         )}
       </main>
+      <Footer />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Nav } from '@/components/Nav'
+import { Footer } from '@/components/Footer'
 import { BillingClient } from './BillingClient'
 import type { Plan } from '@/types/database'
 
@@ -38,6 +39,7 @@ export default async function BillingPage({
         success={!!searchParams.success}
         canceledReason={searchParams.reason === 'canceled'}
       />
+      <Footer />
     </div>
   )
 }
