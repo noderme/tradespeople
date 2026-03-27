@@ -71,11 +71,10 @@ export async function GET(request: NextRequest) {
   }
 
   // No profile found — check if this came from signup or a login attempt.
-  // Use metadata flag OR creation timestamp (within 1 hour) as fallback,
-  // since metadata isn't always reliably returned after PKCE exchange.
+  // Primary signal: ?signup=1 in the redirect URL (set by signup page, survives all redirects).
+  // Fallback: is_new_signup in user_metadata.
   const meta = user.user_metadata ?? {}
-  const justCreated = Date.now() - new Date(user.created_at).getTime() < 60 * 60 * 1000
-  const isNewSignup = meta.is_new_signup === true || justCreated
+  const isNewSignup = searchParams.get('signup') === '1' || meta.is_new_signup === true
 
   if (!isNewSignup) {
     // Someone tried to log in with an email that has no profile

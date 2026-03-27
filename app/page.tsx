@@ -13,11 +13,10 @@ export default async function HomePage({
     const msg = searchParams.error_description || searchParams.error || 'Authentication failed'
     redirect(`/login?error=${encodeURIComponent(msg)}`)
   }
-  if (searchParams.code) {
-    redirect(`/auth/callback?code=${searchParams.code}`)
-  }
-  if (searchParams.token_hash && searchParams.type) {
-    redirect(`/auth/callback?token_hash=${searchParams.token_hash}&type=${searchParams.type}`)
+  if (searchParams.code || searchParams.token_hash) {
+    const params = new URLSearchParams()
+    Object.entries(searchParams).forEach(([k, v]) => { if (v) params.set(k, v) })
+    redirect(`/auth/callback?${params.toString()}`)
   }
 
   const supabase = createClient()
