@@ -6,6 +6,9 @@
     "app/api/webhooks/**": {
       "maxDuration": 60
     },
+    "app/api/whatsapp/**": {
+      "maxDuration": 60
+    },
     "app/api/**": {
       "maxDuration": 30
     }
