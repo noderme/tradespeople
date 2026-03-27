@@ -153,15 +153,31 @@ export async function handleConversation(
     `\nPRICE MEMORY (their past jobs):\n${priceMemoryText}`,
   ].join('\n')
 
-  const response = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: systemWithContext,
-    messages: messages.map(m => ({
-      role: m.role as 'user' | 'assistant',
-      content: m.content,
-    })),
-  })
+  const claudeMessages = messages.map(m => ({
+    role: m.role as 'user' | 'assistant',
+    content: m.content,
+  }))
+
+  let response
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      response = await anthropic.messages.create({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1024,
+        system: systemWithContext,
+        messages: claudeMessages,
+      })
+      break
+    } catch (err: unknown) {
+      const status = (err as { status?: number }).status
+      if (status === 529 && attempt < 2) {
+        await new Promise(resolve => setTimeout(resolve, 1000 * (attempt + 1)))
+        continue
+      }
+      throw err
+    }
+  }
+  if (!response) throw new Error('Claude API unavailable after retries')
 
   const assistantText = response.content
     .filter(b => b.type === 'text')
