@@ -25,6 +25,9 @@ export async function GET(
   const { quote, userProfile } = await getQuoteAndUser(params.quoteId, user.id)
   if (!quote || !userProfile) return new Response('Not found', { status: 404 })
 
+  console.log('Quote data for PDF:', JSON.stringify(quote))
+  console.log('User business_name:', userProfile.business_name)
+
   const buffer   = await buildPdfBuffer(quote, userProfile)
   const year     = new Date(quote.created_at).getFullYear()
   const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`

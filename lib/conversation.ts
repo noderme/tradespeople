@@ -29,9 +29,19 @@ RULES:
 7. Keep replies under 3 lines. They're on a phone.
 8. After confirming the summary, ask for customer name.
 9. Once you have customer name, output ONLY this JSON (no other text):
-   {"action":"generate_quote","line_items":[...],"customer_name":"...","subtotal":0,"total":0}
+   {
+     "action": "generate_quote",
+     "customer_name": "John Smith",
+     "line_items": [
+       { "description": "Pipe repair", "quantity": 1, "unit_price": 120.00, "total": 120.00 },
+       { "description": "Copper fittings x3", "quantity": 3, "unit_price": 15.00, "total": 45.00 }
+     ],
+     "subtotal": 165.00,
+     "total": 165.00
+   }
 
-IMPORTANT: When you have the customer name, you MUST output ONLY the JSON object with action: generate_quote. No other text. Just the raw JSON.`
+CRITICAL: Every line item MUST include the actual "unit_price" and "total" from the conversation — never 0. The "subtotal" and "total" fields must also be the real calculated amounts, not 0.
+IMPORTANT: Output ONLY the raw JSON object. No other text before or after it.`
 
 async function checkPlanAccess(userId: string): Promise<string | null> {
   const supabase = createServiceClient()
@@ -176,6 +186,8 @@ export async function handleConversation(
     }
 
     // Calculate totals
+    console.log('Raw trigger from Claude:', JSON.stringify(trigger))
+
     const lineItems: LineItem[] = trigger.line_items.map(item => ({
       description: item.description,
       quantity: item.quantity ?? 1,
@@ -185,6 +197,8 @@ export async function handleConversation(
 
     const subtotal = lineItems.reduce((sum, item) => sum + item.total, 0)
     const total = subtotal * (1 + taxRate)
+
+    console.log('Quote data for PDF:', JSON.stringify({ customer_name: trigger.customer_name, lineItems, subtotal, total }))
 
     // Insert quote
     const { data: quote, error: quoteError } = await supabase
