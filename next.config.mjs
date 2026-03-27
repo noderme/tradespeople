@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.quotejob.app' }],
+        destination: 'https://quotejob.app/:path*',
+        permanent: true,
+      },
+    ]
+  },
   // Treat these as server-only — they won't be bundled into the Edge Runtime
   // or client bundle, preventing size/compatibility issues on Vercel.
   serverExternalPackages: ['@react-pdf/renderer'],
