@@ -1,31 +1,10 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { handleConversation } from '@/lib/conversation'
 import { generateQuotePdf } from '@/lib/generatePdf'
+import { sendWhatsAppMessage, sendWhatsAppDocument } from '@/lib/whatsapp'
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
   USD: '$', GBP: '£', EUR: '€', CAD: 'CA$', AUD: 'A$', NZD: 'NZ$',
-}
-
-function twiml(message: string, mediaUrl?: string) {
-  const escaped = message
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-
-  const media = mediaUrl ? `\n      <Media>${mediaUrl}</Media>` : ''
-
-  console.log('Returning TwiML:', message)
-
-  return new Response(
-    `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Message>
-    <Body>${escaped}</Body>${media}
-  </Message>
-</Response>`,
-    { status: 200, headers: { 'Content-Type': 'text/xml; charset=utf-8' } }
-  )
 }
 
 export async function POST(request: Request) {
@@ -33,12 +12,7 @@ export async function POST(request: Request) {
   const from     = form.get('From') as string | null   // "whatsapp:+447911123456"
   const bodyText = form.get('Body') as string | null
 
-  if (!from || !bodyText) {
-    return new Response(
-      `<?xml version="1.0" encoding="UTF-8"?>\n<Response/>`,
-      { status: 200, headers: { 'Content-Type': 'text/xml; charset=utf-8' } }
-    )
-  }
+  if (!from || !bodyText) return new Response('', { status: 200 })
 
   // Strip "whatsapp:" prefix to get the plain phone number
   const phone = from.replace('whatsapp:', '')  // "+447911123456"
@@ -56,18 +30,19 @@ export async function POST(request: Request) {
     .maybeSingle()
 
   if (!user) {
-    return twiml("I don't recognise this number. Sign up at TradeQuote to get started.")
+    await sendWhatsAppMessage(phone, "I don't recognise this number. Sign up at TradeQuote to get started.")
+    return new Response('', { status: 200 })
   }
 
-  // Await Claude fully before returning — response MUST come after this
   const result = await handleConversation(user.id, bodyText, phone)
 
-  // Regular message — reply inline via TwiML
   if (result.type === 'message') {
-    return twiml(result.text)
+    console.log('Sending reply via Twilio REST:', result.text)
+    await sendWhatsAppMessage(phone, result.text)
+    return new Response('', { status: 200 })
   }
 
-  // Quote created — generate PDF synchronously, then return TwiML with media
+  // Quote created — generate PDF and send via Twilio REST API
   console.log('Quote JSON received:', result.quoteId)
 
   try {
@@ -77,13 +52,15 @@ export async function POST(request: Request) {
       .eq('id', result.quoteId)
       .single()
 
-    if (!quote) return twiml('Your quote was created. Check your dashboard for the PDF.')
+    if (!quote) {
+      await sendWhatsAppMessage(phone, 'Your quote was created. Check your dashboard for the PDF.')
+      return new Response('', { status: 200 })
+    }
 
     console.log('Generating PDF...')
     await generateQuotePdf(quote, user)
     console.log('PDF generated, uploading to Supabase...')
 
-    // Re-fetch to get the stored pdf_url
     const { data: sent } = await supabase
       .from('quotes')
       .select('pdf_url')
@@ -98,10 +75,17 @@ export async function POST(request: Request) {
     const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
     const caption  = `Quote ${quoteNum} for ${quote.customer_name} — ${symbol}${total}`
 
-    // Return TwiML with PDF as media — single message, no separate REST call
-    return twiml(caption, sent?.pdf_url ?? undefined)
+    if (sent?.pdf_url) {
+      console.log('Sending PDF via Twilio...')
+      await sendWhatsAppDocument(phone, sent.pdf_url, caption)
+      console.log('PDF sent successfully')
+    } else {
+      await sendWhatsAppMessage(phone, caption)
+    }
   } catch (err) {
     console.error('Error generating or sending PDF:', err)
-    return twiml('Your quote was created but the PDF failed to generate. Check your dashboard.')
+    await sendWhatsAppMessage(phone, 'Your quote was created but the PDF failed to generate. Check your dashboard.')
   }
+
+  return new Response('', { status: 200 })
 }
