@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { initializePaddle, type Paddle } from '@paddle/paddle-js'
 import { openPortalAction } from './actions'
+import { Spinner } from '@/components/Spinner'
+import { SubmitButton } from '@/components/SubmitButton'
 import type { Plan } from '@/types/database'
 
 const PLANS: {
@@ -48,6 +50,7 @@ interface Props {
 
 export function BillingClient({ userId, plan, isSubscribed, trialDaysLeft, success, canceledReason }: Props) {
   const [paddle, setPaddle] = useState<Paddle | undefined>()
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
 
   useEffect(() => {
     initializePaddle({
@@ -56,9 +59,10 @@ export function BillingClient({ userId, plan, isSubscribed, trialDaysLeft, succe
     }).then(p => setPaddle(p))
   }, [])
 
-  function handleCheckout(priceEnvKey: string) {
+  function handleCheckout(planId: string, priceEnvKey: string) {
     const priceId = (process.env as Record<string, string>)[priceEnvKey]
     if (!priceId) return
+    setLoadingPlan(planId)
     paddle?.Checkout.open({
       items: [{ priceId, quantity: 1 }],
       customData: { user_id: userId },
@@ -111,12 +115,11 @@ export function BillingClient({ userId, plan, isSubscribed, trialDaysLeft, succe
 
             {isSubscribed && (
               <form action={openPortalAction}>
-                <button
-                  type="submit"
+                <SubmitButton
+                  label="Manage / Cancel →"
+                  loadingLabel="Opening portal…"
                   className="border border-neutral-600 text-neutral-300 text-xs font-bold uppercase tracking-wider px-4 py-2 hover:border-neutral-400 transition-colors"
-                >
-                  Manage / Cancel →
-                </button>
+                />
               </form>
             )}
           </div>
@@ -173,14 +176,15 @@ export function BillingClient({ userId, plan, isSubscribed, trialDaysLeft, succe
                     </div>
                   ) : (
                     <button
-                      onClick={() => handleCheckout(p.priceEnvKey)}
-                      className={`w-full font-bold uppercase tracking-wider py-3 transition-colors ${
+                      onClick={() => handleCheckout(p.id, p.priceEnvKey)}
+                      disabled={loadingPlan === p.id}
+                      className={`w-full font-bold uppercase tracking-wider py-3 transition-colors flex items-center justify-center gap-2 disabled:opacity-70 ${
                         p.highlight
                           ? 'bg-orange-500 text-black hover:bg-orange-400'
                           : 'border border-neutral-600 text-neutral-300 hover:border-neutral-400'
                       }`}
                     >
-                      Get {p.label} →
+                      {loadingPlan === p.id ? <><Spinner />Opening…</> : `Get ${p.label} →`}
                     </button>
                   )}
                 </div>

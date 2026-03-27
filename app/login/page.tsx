@@ -1,4 +1,5 @@
 import { loginAction } from './actions'
+import { SubmitButton } from '@/components/SubmitButton'
 
 export default function LoginPage({
   searchParams,
@@ -43,12 +44,11 @@ export default function LoginPage({
               />
             </div>
 
-            <button
-              type="submit"
+            <SubmitButton
+              label="Send Magic Link →"
+              loadingLabel="Sending…"
               className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors"
-            >
-              Send Magic Link →
-            </button>
+            />
           </form>
 
           <p className="text-neutral-500 text-sm text-center mt-6">

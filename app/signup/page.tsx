@@ -1,4 +1,5 @@
 import { signUpAction } from './actions'
+import { SubmitButton } from '@/components/SubmitButton'
 
 export default function SignupPage({
   searchParams,
@@ -69,12 +70,11 @@ export default function SignupPage({
               />
             </div>
 
-            <button
-              type="submit"
+            <SubmitButton
+              label="Create Account →"
+              loadingLabel="Creating account…"
               className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors mt-2"
-            >
-              Create Account →
-            </button>
+            />
           </form>
 
           <p className="text-neutral-500 text-sm text-center mt-6">
