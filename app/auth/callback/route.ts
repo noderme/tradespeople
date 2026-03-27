@@ -5,7 +5,8 @@ import type { Database } from '@/types/database'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
-  console.log('Callback URL:', request.url)
+
+  console.log('1. Callback hit - full URL:', request.url)
 
   // Supabase sends ?error= when the link is expired, already used, or denied
   const supabaseError = searchParams.get('error_description') || searchParams.get('error')
@@ -16,6 +17,9 @@ export async function GET(request: NextRequest) {
   const code       = searchParams.get('code')
   const token_hash = searchParams.get('token_hash')
   const type       = searchParams.get('type') as EmailOtpType | null
+
+  console.log('2. Code param:', code)
+  console.log('3. Signup param:', searchParams.get('signup'))
 
   if (!code && !token_hash) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Invalid or expired link. Please request a new one.')}`)
@@ -46,35 +50,39 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    console.log('4. Exchange code result:', { data: { user: data?.user?.id }, error })
+    console.log('5. User ID:', data?.user?.id)
     user = data.user
     authError = error
   } else if (token_hash && type) {
     const { data, error } = await supabase.auth.verifyOtp({ token_hash, type })
+    console.log('4. verifyOtp result:', { data: { user: data?.user?.id }, error })
+    console.log('5. User ID:', data?.user?.id)
     user = data.user
     authError = error
   }
 
-  console.log('Auth result — user:', user?.id ?? null, 'error:', authError?.message ?? null)
-
   if (authError || !user) {
+    console.log('7. Redirecting to: /login (auth failed)', authError?.message)
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Authentication failed. Please try again.')}`)
   }
 
-  // Profile exists → route based on onboarding status
-  const { data: existing } = await supabase
+  const { data: userRow, error: userError } = await supabase
     .from('users')
     .select('id, trade_type')
     .eq('id', user.id)
     .single()
 
-  if (existing) {
-    const dest = existing.trade_type ? '/dashboard' : '/onboarding'
-    response.headers.set('Location', `${origin}${dest}`)
+  console.log('6. User lookup result:', { userRow, userError: userError?.message })
+
+  if (userRow) {
+    const redirectTo = userRow.trade_type ? '/dashboard' : '/onboarding'
+    console.log('7. Redirecting to:', redirectTo)
+    response.headers.set('Location', `${origin}${redirectTo}`)
     return response
   }
 
-  // No profile — auth succeeded so this is a valid user. Create profile and send to onboarding.
-  // (If they came via the login page with a fresh email, onboarding will collect what's needed.)
+  // No profile — create it and send to onboarding
   const meta = user.user_metadata ?? {}
   const { error: insertError } = await supabase.from('users').insert({
     id: user.id,
@@ -86,10 +94,12 @@ export async function GET(request: NextRequest) {
   })
 
   if (insertError) {
-    console.error('Failed to create user profile:', insertError.message)
+    console.error('Insert error:', insertError.message)
+    console.log('7. Redirecting to: /login (profile creation failed)')
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Failed to create profile. Please try again.')}`)
   }
 
+  console.log('7. Redirecting to: /onboarding (new user)')
   response.headers.set('Location', `${origin}/onboarding`)
   return response
 }
