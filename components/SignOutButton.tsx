@@ -1,27 +1,29 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { Spinner } from '@/components/Spinner'
 import NProgress from 'nprogress'
 
 export function SignOutButton() {
-  const router = useRouter()
+  const [loading, setLoading] = useState(false)
 
-  function handleSignOut() {
+  async function handleSignOut() {
+    setLoading(true)
     NProgress.start()
-    // Redirect immediately — don't wait for Supabase
-    router.push('/')
-    // Clear session in background
     const supabase = createClient()
-    supabase.auth.signOut().catch(() => {})
+    await supabase.auth.signOut()
+    // Hard navigate so server re-reads cookies and sees no session
+    window.location.href = '/'
   }
 
   return (
     <button
       onClick={handleSignOut}
-      className="text-xs text-neutral-500 hover:text-neutral-200 uppercase tracking-widest font-bold transition-colors"
+      disabled={loading}
+      className="text-xs text-neutral-500 hover:text-neutral-200 uppercase tracking-widest font-bold transition-colors flex items-center gap-1.5"
     >
-      Sign Out
+      {loading ? <><Spinner />Signing out…</> : 'Sign Out'}
     </button>
   )
 }
