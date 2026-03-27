@@ -1,4 +1,4 @@
-import { stripe, priceIdToPlan } from '@/lib/stripe'
+import { getStripe, priceIdToPlan } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase/service'
 import { sendWhatsAppMessage } from '@/lib/whatsapp'
 import { headers } from 'next/headers'
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
 
   let event: Stripe.Event
   try {
-    event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
   } catch (err) {
     console.error('Stripe webhook signature verification failed:', err)
     return new Response(`Webhook error: ${err}`, { status: 400 })
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         if (!userId) break
 
         // Resolve plan from the subscription's price
-        const sub    = await stripe.subscriptions.retrieve(subId)
+        const sub    = await getStripe().subscriptions.retrieve(subId)
         const plan   = priceIdToPlan(sub.items.data[0]?.price.id ?? '')
 
         await supabase

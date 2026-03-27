@@ -1,6 +1,6 @@
 'use server'
 
-import { stripe } from '@/lib/stripe'
+import { getStripe } from '@/lib/stripe'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -17,7 +17,7 @@ export async function createCheckoutAction(priceId: string) {
 
   if (!profile) redirect('/login')
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     ...(profile.stripe_customer_id
       ? { customer: profile.stripe_customer_id }
       : { customer_email: profile.email }
@@ -45,7 +45,7 @@ export async function openCustomerPortalAction() {
 
   if (!profile?.stripe_customer_id) redirect('/billing')
 
-  const portalSession = await stripe.billingPortal.sessions.create({
+  const portalSession = await getStripe().billingPortal.sessions.create({
     customer:   profile.stripe_customer_id,
     return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/billing`,
   })
