@@ -123,10 +123,13 @@ export function ChatInterface({ userId: _userId }: { userId: string }) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-neutral-950 text-neutral-100">
+    <div className="flex flex-col bg-neutral-950 text-neutral-100" style={{ height: '100dvh' }}>
 
       {/* ── Header ─────────────────────────────────────────── */}
-      <header className="flex-none border-b border-neutral-800 px-4 h-14 flex items-center justify-between bg-neutral-950 z-10">
+      <header
+        className="flex-none border-b border-neutral-800 px-4 h-14 flex items-center justify-between bg-neutral-950 z-10"
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+      >
         <span className="font-display font-bold text-xl tracking-widest uppercase text-orange-500">
           TRADEQUOTE
         </span>
@@ -160,14 +163,16 @@ export function ChatInterface({ userId: _userId }: { userId: string }) {
             <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3">
               <button
                 onClick={handleDownloadPdf}
-                className="w-full bg-neutral-700 hover:bg-neutral-600 text-neutral-100 font-bold uppercase tracking-wider text-sm py-3 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-neutral-700 hover:bg-neutral-600 active:bg-neutral-500 text-neutral-100 font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
+                style={{ minHeight: '44px', padding: '12px' }}
               >
                 <span>↓</span> Download PDF
               </button>
               <button
                 onClick={handleSendToCustomer}
                 disabled={stage === 'sending'}
-                className="w-full bg-orange-500 hover:bg-orange-400 disabled:opacity-60 text-black font-bold uppercase tracking-wider text-sm py-3 transition-colors flex items-center justify-center gap-2"
+                className="w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-60 text-black font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
+                style={{ minHeight: '44px', padding: '12px' }}
               >
                 {stage === 'sending' ? 'Generating link…' : <><span>✉</span> Send to Customer</>}
               </button>
@@ -221,7 +226,10 @@ export function ChatInterface({ userId: _userId }: { userId: string }) {
       </div>
 
       {/* ── Input bar ──────────────────────────────────────── */}
-      <div className="flex-none border-t border-neutral-800 bg-neutral-950 px-4 py-3">
+      <div
+        className="flex-none border-t border-neutral-800 bg-neutral-950 px-4 pt-3"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+      >
         <div className="flex gap-3 items-end">
           <textarea
             ref={inputRef}
@@ -231,12 +239,14 @@ export function ChatInterface({ userId: _userId }: { userId: string }) {
             placeholder={stage === 'chatting' ? 'Describe the job…' : 'Quote complete'}
             disabled={sending || stage !== 'chatting'}
             rows={2}
-            className="flex-1 bg-neutral-800 text-neutral-100 placeholder-neutral-500 px-4 py-3 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500 text-[15px] leading-snug disabled:opacity-40"
+            className="flex-1 bg-neutral-800 text-neutral-100 placeholder-neutral-500 px-4 py-3 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500 leading-snug disabled:opacity-40"
+            style={{ fontSize: '16px' }}
           />
           <button
             onClick={sendMessage}
             disabled={!input.trim() || sending || stage !== 'chatting'}
-            className="bg-orange-500 hover:bg-orange-400 disabled:opacity-40 text-black font-bold uppercase tracking-widest text-sm px-5 py-3 h-[60px] transition-colors whitespace-nowrap"
+            className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-40 text-black font-bold uppercase tracking-widest text-sm px-5 transition-colors whitespace-nowrap"
+            style={{ minHeight: '44px', height: '60px' }}
           >
             {sending ? '…' : 'Send →'}
           </button>

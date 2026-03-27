@@ -3,13 +3,18 @@
 @tailwind utilities;
 
 @layer base {
-  body {
+  html, body {
     @apply bg-neutral-950 text-neutral-50 antialiased;
+    /* Prevent body scroll — individual pages manage their own overflow */
+    overflow: hidden;
+    height: 100%;
   }
 
   input, textarea, select {
     @apply bg-neutral-900 border border-neutral-700 text-neutral-50 placeholder:text-neutral-500;
     @apply focus:outline-none focus:border-orange-500;
+    /* Minimum 16px prevents iOS auto-zoom on focus */
+    font-size: max(16px, 1rem);
   }
 }
 
