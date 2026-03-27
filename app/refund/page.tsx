@@ -15,7 +15,7 @@ export default function RefundPage() {
 
           <div>
             <h2 className="text-neutral-100 font-bold text-lg uppercase tracking-wide mb-2">1. Free Trial</h2>
-            <p>All new TradeQuote accounts start with a 7-day free trial. No payment is required during the trial period. We encourage you to fully evaluate the service before subscribing. The trial gives you access to all features and up to 10 quotes.</p>
+            <p>All new TradeQuote accounts start with a 7-day free trial. No credit card required. We encourage you to fully evaluate the service before subscribing. The trial gives you access to all features and up to 10 quotes.</p>
           </div>
 
           <div>
@@ -35,7 +35,7 @@ export default function RefundPage() {
 
           <div>
             <h2 className="text-neutral-100 font-bold text-lg uppercase tracking-wide mb-2">4. Exceptions</h2>
-            <p>We may issue refunds at our sole discretion in exceptional circumstances — for example, if a technical error on our part resulted in a duplicate charge. To request an exception, contact us within 7 days of the charge at support@tradequote.app with your account email and a description of the issue.</p>
+            <p>We may issue refunds at our sole discretion in exceptional circumstances — for example, if a technical error on our part resulted in a duplicate charge. To request an exception, contact us within 7 days of the charge at support@tradequotehq.com with your account email and a description of the issue.</p>
           </div>
 
           <div>
@@ -45,7 +45,7 @@ export default function RefundPage() {
 
           <div>
             <h2 className="text-neutral-100 font-bold text-lg uppercase tracking-wide mb-2">6. Contact</h2>
-            <p>Questions about billing or this policy: support@tradequote.app.</p>
+            <p>Questions about billing or this policy: support@tradequotehq.com.</p>
           </div>
 
         </section>

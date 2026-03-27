@@ -65,7 +65,7 @@ export default function TermsPage() {
 
           <div>
             <h2 className="text-neutral-100 font-bold text-lg uppercase tracking-wide mb-2">11. Contact</h2>
-            <p>For questions about these terms, contact us at support@tradequote.app.</p>
+            <p>For questions about these terms, contact us at support@tradequotehq.com.</p>
           </div>
 
         </section>

@@ -68,7 +68,7 @@ export default function PrivacyPage() {
               <li><strong className="text-neutral-200">Portability:</strong> receive your data in a machine-readable format.</li>
               <li><strong className="text-neutral-200">Opt-out (CCPA):</strong> California residents may opt out of the sale of personal information. We do not sell personal information.</li>
             </ul>
-            <p className="mt-2">To exercise any of these rights, email us at privacy@tradequote.app.</p>
+            <p className="mt-2">To exercise any of these rights, email us at support@tradequotehq.com.</p>
           </div>
 
           <div>
@@ -83,12 +83,12 @@ export default function PrivacyPage() {
 
           <div>
             <h2 className="text-neutral-100 font-bold text-lg uppercase tracking-wide mb-2">9. Changes to This Policy</h2>
-            <p>We may update this policy from time to time. We will notify you by email before material changes take effect. The current version is always available at tradequote.app/privacy.</p>
+            <p>We may update this policy from time to time. We will notify you by email before material changes take effect. The current version is always available at tradequotehq.com/privacy.</p>
           </div>
 
           <div>
             <h2 className="text-neutral-100 font-bold text-lg uppercase tracking-wide mb-2">10. Contact</h2>
-            <p>For privacy-related questions or requests: privacy@tradequote.app.</p>
+            <p>For privacy-related questions or requests: support@tradequotehq.com.</p>
           </div>
 
         </section>
