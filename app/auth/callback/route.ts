@@ -1,19 +1,20 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import type { EmailOtpType } from '@supabase/supabase-js'
 import type { Database } from '@/types/database'
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
-  const code = searchParams.get('code')
 
-  if (!code) {
+  const code        = searchParams.get('code')         // OAuth / PKCE flow
+  const token_hash  = searchParams.get('token_hash')   // Magic link / OTP flow
+  const type        = searchParams.get('type') as EmailOtpType | null
+
+  if (!code && !token_hash) {
     return NextResponse.redirect(`${origin}/login?error=no_code`)
   }
 
-  // Build the redirect response up front so we can attach session cookies to it.
-  // The `next/headers` cookie store used by createClient() does NOT propagate
-  // cookies onto a NextResponse.redirect() — they get dropped, leaving the
-  // browser sessionless and triggering an infinite redirect loop.
+  // Build redirect response first so session cookies attach to it
   const response = NextResponse.redirect(`${origin}/dashboard`)
 
   const supabase = createServerClient<Database>(
@@ -33,9 +34,20 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
+  let user = null
+  let authError = null
 
-  if (error || !user) {
+  if (code) {
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    user = data.user
+    authError = error
+  } else if (token_hash && type) {
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash, type })
+    user = data.user
+    authError = error
+  }
+
+  if (authError || !user) {
     return NextResponse.redirect(`${origin}/login?error=auth_failed`)
   }
 
