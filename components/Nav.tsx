@@ -1,13 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-
-async function signOut() {
-  'use server'
-  const supabase = createClient()
-  await supabase.auth.signOut()
-  redirect('/login')
-}
+import { SignOutButton } from '@/components/SignOutButton'
 
 export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'billing' | 'chat' }) {
   const supabase = createClient()
@@ -38,7 +31,7 @@ export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'bil
     <nav className="border-b border-neutral-800 bg-neutral-950 sticky top-0 z-10">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <Link href="/dashboard" className="font-display font-bold text-lg tracking-widest uppercase text-orange-500">
+          <Link href="/" className="font-display font-bold text-lg tracking-widest uppercase text-orange-500">
             TRADEQUOTE
           </Link>
           <div className="hidden sm:flex items-center gap-6">
@@ -55,14 +48,7 @@ export async function Nav({ active }: { active?: 'dashboard' | 'settings' | 'bil
               {trialDaysLeft}d left
             </span>
           )}
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="text-xs text-neutral-500 hover:text-neutral-200 uppercase tracking-widest font-bold transition-colors"
-            >
-              Sign Out
-            </button>
-          </form>
+          <SignOutButton />
         </div>
       </div>
     </nav>
