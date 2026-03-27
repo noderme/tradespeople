@@ -63,31 +63,43 @@ export async function POST(request: Request) {
   }
 
   // Quote created — generate PDF and send via Twilio REST API
-  const { data: quote } = await supabase
-    .from('quotes')
-    .select('*')
-    .eq('id', result.quoteId)
-    .single()
+  console.log('Quote JSON received:', result.quoteId)
 
-  if (!quote) return twimlEmpty()
+  try {
+    const { data: quote } = await supabase
+      .from('quotes')
+      .select('*')
+      .eq('id', result.quoteId)
+      .single()
 
-  await generateQuotePdf(quote, user)
+    if (!quote) return twimlEmpty()
 
-  // Re-fetch to get the uploaded pdf_url
-  const { data: sent } = await supabase
-    .from('quotes')
-    .select('pdf_url')
-    .eq('id', result.quoteId)
-    .single()
+    console.log('Generating PDF...')
+    await generateQuotePdf(quote, user)
+    console.log('PDF generated, uploading to Supabase...')
 
-  if (sent?.pdf_url) {
-    const symbol   = CURRENCY_SYMBOLS[user.currency ?? 'USD'] ?? '$'
-    const total    = Number(quote.total).toFixed(2)
-    const year     = new Date(quote.created_at).getFullYear()
-    const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
-    const caption  = `Quote ${quoteNum} for ${quote.customer_name} — ${symbol}${total}`
+    // Re-fetch to get the uploaded pdf_url
+    const { data: sent } = await supabase
+      .from('quotes')
+      .select('pdf_url')
+      .eq('id', result.quoteId)
+      .single()
 
-    await sendWhatsAppDocument(phone, sent.pdf_url, caption)
+    console.log('PDF URL:', sent?.pdf_url)
+
+    if (sent?.pdf_url) {
+      const symbol   = CURRENCY_SYMBOLS[user.currency ?? 'USD'] ?? '$'
+      const total    = Number(quote.total).toFixed(2)
+      const year     = new Date(quote.created_at).getFullYear()
+      const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
+      const caption  = `Quote ${quoteNum} for ${quote.customer_name} — ${symbol}${total}`
+
+      console.log('Sending PDF via Twilio...')
+      await sendWhatsAppDocument(phone, sent.pdf_url, caption)
+      console.log('PDF sent successfully')
+    }
+  } catch (err) {
+    console.error('Error generating or sending PDF:', err)
   }
 
   // Return empty TwiML — the PDF message was sent via REST API above
