@@ -20,3 +20,12 @@
     text-wrap: balance;
   }
 }
+
+/* NProgress bar — orange to match brand */
+#nprogress .bar {
+  background: #F97316 !important;
+  height: 3px !important;
+}
+#nprogress .peg {
+  box-shadow: 0 0 10px #F97316, 0 0 5px #F97316 !important;
+}

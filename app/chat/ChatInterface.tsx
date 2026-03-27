@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { Spinner } from '@/components/Spinner'
 
 interface Message {
   role: 'user' | 'bot'
@@ -194,7 +195,7 @@ export function ChatInterface({ userId }: { userId: string }) {
                 className="w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-50 text-black font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
                 style={{ minHeight: '44px', padding: '12px' }}
               >
-                {quoteReady.pdfLoading ? 'Preparing PDF…' : '↗ View Quote'}
+                {quoteReady.pdfLoading ? <><Spinner className="mr-2" />Preparing PDF…</> : '↗ View Quote'}
               </button>
 
               {/* 2. Secondary: Download */}
@@ -247,7 +248,7 @@ export function ChatInterface({ userId }: { userId: string }) {
                     disabled={!email.trim() || sendingEmail}
                     className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
                   >
-                    {sendingEmail ? '…' : 'Send →'}
+                    {sendingEmail ? <><Spinner className="mr-1" />Sending…</> : 'Send →'}
                   </button>
                 </div>
               )}
@@ -291,7 +292,7 @@ export function ChatInterface({ userId }: { userId: string }) {
             className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-40 text-black font-bold uppercase tracking-widest text-sm px-5 transition-colors whitespace-nowrap"
             style={{ minHeight: '44px', height: '60px' }}
           >
-            {sending ? '…' : 'Send →'}
+            {sending ? <><Spinner className="mr-1" />Sending…</> : 'Send →'}
           </button>
         </div>
         <p className="text-neutral-600 text-xs mt-2 text-center">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Spinner } from '@/components/Spinner'
 import type { Database, QuoteStatus } from '@/types/database'
 
 type Quote = Database['public']['Tables']['quotes']['Row']
@@ -177,7 +178,7 @@ export function QuotesTable({ quotes, currency }: { quotes: Quote[], currency: s
                 disabled={!email.trim() || sending}
                 className="flex-1 bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black font-bold uppercase tracking-wider py-3 transition-colors"
               >
-                {sending ? 'Sending…' : 'Send PDF →'}
+                {sending ? <><Spinner className="mr-2" />Sending…</> : 'Send PDF →'}
               </button>
               <button
                 onClick={closeModal}

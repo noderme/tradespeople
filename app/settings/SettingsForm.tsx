@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfileAction, uploadLogoAction } from './actions'
+import { Spinner } from '@/components/Spinner'
 import type { Database } from '@/types/database'
 
 type UserRow = Database['public']['Tables']['users']['Row']
@@ -82,7 +83,7 @@ export function SettingsForm({ profile }: { profile: UserRow }) {
               onClick={() => fileRef.current?.click()}
               className="border border-neutral-600 text-neutral-300 text-xs font-bold uppercase tracking-wider px-4 py-2 hover:border-neutral-400 transition-colors"
             >
-              {logoSaving ? 'Uploading...' : 'Change Logo'}
+              {logoSaving ? <><Spinner className="mr-2" />Uploading…</> : 'Change Logo'}
             </button>
             <p className="text-neutral-600 text-xs mt-2">PNG or JPG, max 2MB</p>
           </div>
@@ -192,7 +193,7 @@ export function SettingsForm({ profile }: { profile: UserRow }) {
           disabled={saving}
           className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors disabled:opacity-50"
         >
-          {saving ? 'Saving...' : 'Save Changes'}
+          {saving ? <><Spinner className="mr-2" />Saving…</> : 'Save Changes'}
         </button>
       </form>
     </div>
