@@ -16,11 +16,7 @@ interface QuoteReady {
   pdfLoading: boolean
 }
 
-// quote_prompt  → "Another job?" question
-// quote_actions → action panel (view / send / download)
-type Stage = 'chatting' | 'quote_prompt' | 'quote_actions'
-
-const INACTIVITY_MS = 5 * 60 * 1000 // 5 minutes
+type Stage = 'chatting' | 'quote_ready'
 
 const WELCOME = "Hey! Describe your first job and I'll generate a PDF quote in seconds."
 
@@ -29,43 +25,20 @@ export function ChatInterface({ userId }: { userId: string }) {
   const threadId  = useRef(typeof crypto !== 'undefined' ? crypto.randomUUID() : Math.random().toString(36)).current
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef  = useRef<HTMLTextAreaElement>(null)
-  const timerRef  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [messages,    setMessages]    = useState<Message[]>([{ role: 'bot', text: WELCOME }])
-  const [input,       setInput]       = useState('')
-  const [sending,     setSending]     = useState(false)
-  const [stage,       setStage]       = useState<Stage>('chatting')
-  const [quoteReady,  setQuoteReady]  = useState<QuoteReady | null>(null)
-
-  // Action panel sub-states
-  const [showEmail,   setShowEmail]   = useState(false)
-  const [email,       setEmail]       = useState('')
+  const [messages,     setMessages]     = useState<Message[]>([{ role: 'bot', text: WELCOME }])
+  const [input,        setInput]        = useState('')
+  const [sending,      setSending]      = useState(false)
+  const [stage,        setStage]        = useState<Stage>('chatting')
+  const [quoteReady,   setQuoteReady]   = useState<QuoteReady | null>(null)
+  const [email,        setEmail]        = useState('')
   const [sendingEmail, setSendingEmail] = useState(false)
   const [emailError,   setEmailError]   = useState<string | null>(null)
   const [emailSent,    setEmailSent]    = useState(false)
-  const [timedOut,     setTimedOut]     = useState(false)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, stage])
-
-  // ── Inactivity timer ──────────────────────────────────────────────────────
-
-  function startInactivityTimer() {
-    if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => setTimedOut(true), INACTIVITY_MS)
-  }
-
-  function resetInactivityTimer() {
-    if (timedOut) return
-    startInactivityTimer()
-  }
-
-  useEffect(() => {
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [])
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
 
   const addBotMessage = useCallback((text: string) => {
     setMessages(prev => [...prev.filter(m => !m.loading), { role: 'bot', text }])
@@ -80,8 +53,6 @@ export function ChatInterface({ userId }: { userId: string }) {
       setQuoteReady(prev => prev ? { ...prev, pdfLoading: false } : null)
     }
   }
-
-  // ── Send message ──────────────────────────────────────────────────────────
 
   async function sendMessage() {
     const text = input.trim()
@@ -108,10 +79,9 @@ export function ChatInterface({ userId }: { userId: string }) {
       if (result.type === 'message') {
         addBotMessage(result.text)
       } else if (result.type === 'quote_created') {
-        addBotMessage("Your quote is ready!")
-        const initial: QuoteReady = { quoteId: result.quoteId, pdfUrl: null, pdfLoading: true }
-        setQuoteReady(initial)
-        setStage('quote_prompt')
+        addBotMessage('Your quote is ready.')
+        setQuoteReady({ quoteId: result.quoteId, pdfUrl: null, pdfLoading: true })
+        setStage('quote_ready')
         generatePdfUrl(result.quoteId)
       }
     } catch {
@@ -129,51 +99,8 @@ export function ChatInterface({ userId }: { userId: string }) {
     }
   }
 
-  // ── Step 1 actions ─────────────────────────────────────────────────────────
-
-  function handleStartAnother() {
-    // Quote is already saved — just reset the chat
-    if (timerRef.current) clearTimeout(timerRef.current)
-    setMessages([{ role: 'bot', text: "Ready for the next one! Describe the job." }])
-    setStage('chatting')
-    setQuoteReady(null)
-    setShowEmail(false)
-    setEmail('')
-    setSendingEmail(false)
-    setEmailError(null)
-    setEmailSent(false)
-    setTimedOut(false)
-    inputRef.current?.focus()
-  }
-
-  function handleDone() {
-    setStage('quote_actions')
-    startInactivityTimer()
-  }
-
-  // ── Step 2 actions ─────────────────────────────────────────────────────────
-
-  function handleViewPdf() {
-    if (quoteReady?.pdfUrl) {
-      resetInactivityTimer()
-      window.open(quoteReady.pdfUrl, '_blank')
-    }
-  }
-
-  function handleDownload() {
-    if (!quoteReady) return
-    resetInactivityTimer()
-    window.open(`/api/chat/pdf/${quoteReady.quoteId}`, '_blank')
-  }
-
-  function handleToggleEmail() {
-    resetInactivityTimer()
-    setShowEmail(v => !v)
-  }
-
   async function handleEmailSend() {
     if (!quoteReady || !email.trim()) return
-    resetInactivityTimer()
     setSendingEmail(true)
     setEmailError(null)
     try {
@@ -194,7 +121,16 @@ export function ChatInterface({ userId }: { userId: string }) {
     }
   }
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  function startAnother() {
+    setMessages([{ role: 'bot', text: "Ready for the next one! Describe the job." }])
+    setStage('chatting')
+    setQuoteReady(null)
+    setEmail('')
+    setSendingEmail(false)
+    setEmailError(null)
+    setEmailSent(false)
+    inputRef.current?.focus()
+  }
 
   return (
     <div className="flex flex-col bg-neutral-950 text-neutral-100" style={{ height: '100dvh', overflow: 'hidden' }}>
@@ -231,114 +167,61 @@ export function ChatInterface({ userId }: { userId: string }) {
           </div>
         ))}
 
-        {/* ── STEP 1: Another job? ─────────────────────────── */}
-        {stage === 'quote_prompt' && (
+        {/* ── Quote ready panel ────────────────────────────── */}
+        {stage === 'quote_ready' && quoteReady && (
           <div className="flex justify-start">
             <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3">
-              <p className="text-sm text-neutral-200 font-medium">
-                Quote saved! Do you have another job to quote?
-              </p>
-              <button
-                onClick={handleStartAnother}
-                className="w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600 text-black font-bold uppercase tracking-wider text-sm transition-colors"
-                style={{ minHeight: '44px', padding: '12px' }}
-              >
-                Yes, start another →
-              </button>
-              <button
-                onClick={handleDone}
-                className="w-full bg-neutral-700 hover:bg-neutral-600 text-neutral-200 font-bold uppercase tracking-wider text-sm transition-colors"
-                style={{ minHeight: '44px', padding: '12px' }}
-              >
-                No, I&apos;m done
-              </button>
-            </div>
-          </div>
-        )}
 
-        {/* ── STEP 2: Action panel ─────────────────────────── */}
-        {stage === 'quote_actions' && quoteReady && (
-          <div className="flex justify-start">
-            <div
-              className={`bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3 transition-opacity duration-700 ${timedOut ? 'opacity-0 pointer-events-none h-0 overflow-hidden p-0 m-0' : 'opacity-100'}`}
-            >
-              {/* View PDF */}
-              <button
-                onClick={handleViewPdf}
-                disabled={quoteReady.pdfLoading || !quoteReady.pdfUrl}
-                className="w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-50 text-black font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
-                style={{ minHeight: '44px', padding: '12px' }}
-              >
-                {quoteReady.pdfLoading ? <><Spinner className="mr-2" />Preparing PDF…</> : '↗ View PDF'}
-              </button>
-
-              {/* Send to Customer */}
-              <button
-                onClick={handleToggleEmail}
-                disabled={quoteReady.pdfLoading || !quoteReady.pdfUrl}
-                className="w-full bg-neutral-900 hover:bg-neutral-700 disabled:opacity-50 border border-neutral-600 text-neutral-200 font-bold uppercase tracking-wider text-sm transition-colors"
-                style={{ minHeight: '44px', padding: '12px' }}
-              >
-                ✉ Send to Customer
-              </button>
-
-              {/* Email input — expands inline */}
-              {showEmail && (
-                <div className="space-y-2">
-                  {emailSent ? (
-                    <div className="text-green-400 text-sm font-bold uppercase tracking-wider">
-                      ✓ Email sent!
-                    </div>
-                  ) : (
-                    <div className="flex gap-2">
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={e => { setEmail(e.target.value); setEmailError(null) }}
-                        placeholder="Customer email"
-                        className="flex-1 bg-neutral-700 text-neutral-100 px-3 py-2 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                        style={{ fontSize: '16px' }}
-                        autoFocus
-                      />
-                      <button
-                        onClick={handleEmailSend}
-                        disabled={!email.trim() || sendingEmail}
-                        className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
-                      >
-                        {sendingEmail ? <><Spinner className="mr-1" />Sending…</> : 'Send →'}
-                      </button>
-                    </div>
-                  )}
-                  {emailError && <div className="text-red-400 text-xs">{emailError}</div>}
+              {/* Email send */}
+              {emailSent ? (
+                <div className="text-green-400 text-sm font-bold uppercase tracking-wider">
+                  Sent! ✓
                 </div>
+              ) : (
+                <>
+                  <div className="flex gap-2">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={e => { setEmail(e.target.value); setEmailError(null) }}
+                      onKeyDown={e => { if (e.key === 'Enter') handleEmailSend() }}
+                      placeholder="Customer email"
+                      disabled={quoteReady.pdfLoading}
+                      className="flex-1 bg-neutral-700 text-neutral-100 px-3 py-2 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-40"
+                      style={{ fontSize: '16px' }}
+                    />
+                    <button
+                      onClick={handleEmailSend}
+                      disabled={!email.trim() || sendingEmail || quoteReady.pdfLoading}
+                      className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
+                    >
+                      {sendingEmail
+                        ? <><Spinner className="mr-1" />Sending…</>
+                        : quoteReady.pdfLoading
+                        ? <><Spinner className="mr-1" />Preparing…</>
+                        : 'Send to Customer →'}
+                    </button>
+                  </div>
+                  {emailError && <div className="text-red-400 text-xs">{emailError}</div>}
+                </>
               )}
 
-              {/* Download */}
-              <button
-                onClick={handleDownload}
-                className="w-full bg-neutral-700 hover:bg-neutral-600 text-neutral-200 font-bold uppercase tracking-wider text-sm transition-colors"
-                style={{ minHeight: '44px', padding: '12px' }}
-              >
-                ↓ Download
-              </button>
-            </div>
-          </div>
-        )}
+              {/* Subtle text links */}
+              <div className="flex gap-4 pt-1">
+                <button
+                  onClick={startAnother}
+                  className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-wider transition-colors"
+                >
+                  Start another job
+                </button>
+                <Link
+                  href="/dashboard"
+                  className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-wider transition-colors"
+                >
+                  Go to dashboard
+                </Link>
+              </div>
 
-        {/* ── STEP 3: Timed-out message ────────────────────── */}
-        {stage === 'quote_actions' && timedOut && (
-          <div className="flex justify-start">
-            <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3 animate-in fade-in duration-700">
-              <p className="text-sm text-neutral-300 leading-relaxed">
-                Quote saved to your dashboard.
-              </p>
-              <Link
-                href="/dashboard"
-                className="block w-full bg-neutral-700 hover:bg-neutral-600 text-neutral-200 font-bold uppercase tracking-wider text-sm text-center transition-colors"
-                style={{ minHeight: '44px', padding: '12px' }}
-              >
-                View it anytime → Dashboard
-              </Link>
             </div>
           </div>
         )}
