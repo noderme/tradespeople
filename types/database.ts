@@ -24,8 +24,8 @@ export type Database = {
           logo_url: string | null
           plan: Plan
           trial_ends_at: string | null
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
+          paddle_customer_id: string | null
+          paddle_subscription_id: string | null
           trade_type: TradeType | null
           default_tax_rate: number
           currency: string
@@ -42,8 +42,8 @@ export type Database = {
           logo_url?: string | null
           plan?: Plan
           trial_ends_at?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           trade_type?: TradeType | null
           default_tax_rate?: number
           currency?: string
@@ -60,8 +60,8 @@ export type Database = {
           logo_url?: string | null
           plan?: Plan
           trial_ends_at?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
+          paddle_customer_id?: string | null
+          paddle_subscription_id?: string | null
           trade_type?: TradeType | null
           default_tax_rate?: number
           currency?: string

@@ -1,54 +1,26 @@
 'use server'
 
-import { getStripe } from '@/lib/stripe'
+import { getPaddle } from '@/lib/paddle'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
-export async function createCheckoutAction(priceId: string) {
+export async function openPortalAction() {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
     .from('users')
-    .select('*')
+    .select('paddle_customer_id')
     .eq('id', user.id)
     .single()
 
-  if (!profile) redirect('/login')
+  if (!profile?.paddle_customer_id) redirect('/billing')
 
-  const session = await getStripe().checkout.sessions.create({
-    ...(profile.stripe_customer_id
-      ? { customer: profile.stripe_customer_id }
-      : { customer_email: profile.email }
-    ),
-    mode: 'subscription',
-    line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/billing?success=1`,
-    cancel_url:  `${process.env.NEXT_PUBLIC_SITE_URL}/billing`,
-    metadata: { user_id: user.id },
-  })
+  const session = await getPaddle().customerPortalSessions.create(
+    profile.paddle_customer_id,
+    [],
+  )
 
-  redirect(session.url!)
-}
-
-export async function openCustomerPortalAction() {
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('users')
-    .select('stripe_customer_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile?.stripe_customer_id) redirect('/billing')
-
-  const portalSession = await getStripe().billingPortal.sessions.create({
-    customer:   profile.stripe_customer_id,
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/billing`,
-  })
-
-  redirect(portalSession.url)
+  redirect(session.urls.general.overview)
 }
