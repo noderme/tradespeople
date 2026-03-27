@@ -148,7 +148,7 @@ export function ChatInterface({ userId }: { userId: string }) {
   }
 
   return (
-    <div className="flex flex-col bg-neutral-950 text-neutral-100" style={{ height: '100dvh' }}>
+    <div className="flex flex-col bg-neutral-950 text-neutral-100" style={{ height: '100dvh', overflow: 'hidden' }}>
 
       {/* ── Header ─────────────────────────────────────────── */}
       <header

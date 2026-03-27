@@ -5,9 +5,6 @@
 @layer base {
   html, body {
     @apply bg-neutral-950 text-neutral-50 antialiased;
-    /* Prevent body scroll — individual pages manage their own overflow */
-    overflow: hidden;
-    height: 100%;
   }
 
   input, textarea, select {
