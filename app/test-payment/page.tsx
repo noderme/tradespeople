@@ -1,21 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { initializePaddle, type Paddle } from '@paddle/paddle-js'
 
 export default function TestPaymentPage() {
-  const searchParams = useSearchParams()
   const [paddle,  setPaddle]  = useState<Paddle | undefined>()
-  const [success, setSuccess] = useState(searchParams.get('success') === '1')
+  const [success, setSuccess] = useState(false)
 
   useEffect(() => {
-    if (searchParams.get('success') === '1') { setSuccess(true); return }
+    if (new URLSearchParams(window.location.search).get('success') === '1') {
+      setSuccess(true)
+      return
+    }
     initializePaddle({
       environment: 'production',
       token: process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN!,
     }).then(p => setPaddle(p))
-  }, [searchParams])
+  }, [])
 
   function handlePay() {
     paddle?.Checkout.open({
