@@ -23,7 +23,7 @@ export default function SignupPage() {
     setError(null)
 
     const supabase = createClient()
-    const emailRedirectTo = `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?signup=1`
+    const emailRedirectTo = `${window.location.origin}/auth/callback?signup=1`
     console.log('emailRedirectTo:', emailRedirectTo)
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
