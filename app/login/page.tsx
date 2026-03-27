@@ -44,6 +44,7 @@ export default function LoginPage() {
             <div className="text-4xl mb-4">✉</div>
             <h2 className="font-display font-bold text-3xl uppercase tracking-tight mb-3">Check your email</h2>
             <p className="text-neutral-400">We sent a magic link to <span className="text-neutral-200">{email}</span>. Click it to sign in.</p>
+            <p className="text-neutral-600 text-xs mt-3">Open the link in this same browser.</p>
           </div>
         </div>
       </div>

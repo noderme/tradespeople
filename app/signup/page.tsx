@@ -1,21 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/client'
 import { Spinner } from '@/components/Spinner'
-
-const supabase = createSupabaseClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      flowType: 'implicit',
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true,
-    },
-  }
-)
 
 export default function SignupPage() {
   const [fullName,     setFullName]     = useState('')
@@ -35,13 +22,11 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    const emailRedirectTo = 'https://quotejob.app/auth/callback?signup=1'
-    console.log('emailRedirectTo:', emailRedirectTo)
+    const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo,
-        shouldCreateUser: true,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
         data: {
           full_name: fullName.trim(),
           business_name: businessName.trim(),
@@ -70,6 +55,7 @@ export default function SignupPage() {
             <div className="text-4xl mb-4">✉</div>
             <h2 className="font-display font-bold text-3xl uppercase tracking-tight mb-3">Check your email</h2>
             <p className="text-neutral-400">We sent a magic link to <span className="text-neutral-200">{email}</span>. Click it to activate your account.</p>
+            <p className="text-neutral-600 text-xs mt-3">Open the link in this same browser.</p>
           </div>
         </div>
       </div>
