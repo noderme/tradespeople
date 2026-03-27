@@ -127,13 +127,13 @@ export default async function HomePage() {
               {
                 label: 'Starter',
                 price: 29,
-                features: ['10 quotes/month', 'PDF generation', 'Email delivery', 'Custom branding'],
+                features: ['10 quotes/month', 'PDF generation', 'Email delivery', 'WhatsApp bot'],
                 highlight: false,
               },
               {
                 label: 'Pro',
                 price: 79,
-                features: ['Unlimited quotes', 'PDF generation', 'Email delivery', 'Custom branding', 'Priority support'],
+                features: ['Unlimited quotes', 'PDF generation', 'Email delivery', 'WhatsApp bot', 'Custom branding', 'Priority support'],
                 highlight: true,
               },
               {

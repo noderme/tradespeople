@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { uploadLogoAction, saveTradeTypeAction } from './actions'
-import { Spinner } from '@/components/Spinner'
 
 const TRADES = [
   { value: 'plumber', label: '🔧 Plumber' },
@@ -122,7 +121,7 @@ export default function OnboardingPage() {
                   disabled={loading}
                   className="flex-1 bg-orange-500 text-black font-bold uppercase tracking-wider py-4 hover:bg-orange-400 transition-colors disabled:opacity-50"
                 >
-                  {loading ? <><Spinner />Uploading…</> : logoPreview ? 'Upload & Continue →' : 'Continue →'}
+                  {loading ? 'Uploading...' : logoPreview ? 'Upload & Continue →' : 'Continue →'}
                 </button>
               </div>
 
@@ -169,7 +168,7 @@ export default function OnboardingPage() {
                 disabled={!selectedTrade || loading}
                 className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors disabled:opacity-50"
               >
-                {loading ? <><Spinner />Setting up…</> : 'Go to Dashboard →'}
+                {loading ? 'Setting up...' : 'Go to Dashboard →'}
               </button>
             </div>
           )}

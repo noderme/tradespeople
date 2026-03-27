@@ -8,6 +8,11 @@ function formatCurrency(amount: number, currency: string) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
 }
 
+function formatDate(date: string) {
+  return new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+// formatDate kept for potential future use
+void formatDate
 
 export default async function DashboardPage() {
   const supabase = createClient()

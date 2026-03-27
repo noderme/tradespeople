@@ -1,0 +1,22 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+
+export async function loginAction(formData: FormData) {
+  const email = (formData.get('email') as string).trim()
+  const supabase = createClient()
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      emailRedirectTo: process.env.NEXT_PUBLIC_APP_URL + '/auth/callback',
+    },
+  })
+
+  if (error) {
+    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+  }
+
+  redirect('/login/check-email')
+}
