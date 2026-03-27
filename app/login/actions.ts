@@ -10,12 +10,14 @@ export async function loginAction(formData: FormData) {
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
-      emailRedirectTo: process.env.NEXT_PUBLIC_APP_URL + '/auth/callback',
+      emailRedirectTo: 'https://quotejob.app/auth/callback',
+      shouldCreateUser: false,
     },
   })
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`)
+    // Supabase returns an error when shouldCreateUser: false and email doesn't exist
+    redirect(`/login?error=no_account`)
   }
 
   redirect('/login/check-email')

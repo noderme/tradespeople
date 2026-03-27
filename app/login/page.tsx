@@ -24,11 +24,18 @@ export default function LoginPage({
             <p className="text-neutral-400">We&apos;ll email you a magic link.</p>
           </div>
 
-          {searchParams.error && (
+          {searchParams.error === 'no_account' ? (
+            <div className="bg-red-950 border border-red-800 text-red-300 px-4 py-3 text-sm mb-6">
+              No account found.{' '}
+              <a href="/signup" className="underline text-red-200 hover:text-white">
+                Start your free trial →
+              </a>
+            </div>
+          ) : searchParams.error ? (
             <div className="bg-red-950 border border-red-800 text-red-300 px-4 py-3 text-sm mb-6">
               {searchParams.error === 'auth_failed' ? 'Authentication failed. Please try again.' : searchParams.error}
             </div>
-          )}
+          ) : null}
 
           <form action={loginAction} className="space-y-4">
             <div>
