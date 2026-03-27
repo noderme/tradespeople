@@ -1,31 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthCallbackPage() {
-  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const supabase = createClient()
 
-    async function handleAuth() {
-      // With implicit flow, the browser client automatically processes
-      // the #access_token hash fragment on initialization.
-      // Give it a tick to complete before calling getSession.
-      await new Promise(r => setTimeout(r, 100))
+    // onAuthStateChange fires reliably once the browser client processes
+    // the #access_token hash from the magic link URL.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return
+      subscription.unsubscribe()
 
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-      if (sessionError || !session) {
-        console.log('No session:', sessionError?.message)
-        router.replace('/login?error=' + encodeURIComponent('Authentication failed. Please try again.'))
+      if (!session) {
+        window.location.href = '/login?error=' + encodeURIComponent('Authentication failed. Please try again.')
         return
       }
-
-      console.log('Session established for user:', session.user.id)
 
       // Check if profile exists
       const { data: profile } = await supabase
@@ -35,7 +28,7 @@ export default function AuthCallbackPage() {
         .single()
 
       if (profile) {
-        router.replace(profile.trade_type ? '/dashboard' : '/onboarding')
+        window.location.href = profile.trade_type ? '/dashboard' : '/onboarding'
         return
       }
 
@@ -56,11 +49,11 @@ export default function AuthCallbackPage() {
         return
       }
 
-      router.replace('/onboarding')
-    }
+      window.location.href = '/onboarding'
+    })
 
-    handleAuth()
-  }, [router])
+    return () => subscription.unsubscribe()
+  }, [])
 
   if (error) {
     return (
@@ -77,9 +70,7 @@ export default function AuthCallbackPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-neutral-400 text-sm uppercase tracking-widest">Signing you in…</div>
-      </div>
+      <div className="text-neutral-400 text-sm uppercase tracking-widest">Signing you in…</div>
     </div>
   )
 }
