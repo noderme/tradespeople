@@ -29,7 +29,9 @@ RULES:
 7. Keep replies under 3 lines. They're on a phone.
 8. After confirming the summary, ask for customer name.
 9. Once you have customer name, output ONLY this JSON (no other text):
-   {"action":"generate_quote","line_items":[...],"customer_name":"...","subtotal":0,"total":0}`
+   {"action":"generate_quote","line_items":[...],"customer_name":"...","subtotal":0,"total":0}
+
+IMPORTANT: When you have the customer name, you MUST output ONLY the JSON object with action: generate_quote. No other text. Just the raw JSON.`
 
 async function checkPlanAccess(userId: string): Promise<string | null> {
   const supabase = createServiceClient()
@@ -87,6 +89,8 @@ export async function handleConversation(
   if (gateMessage) return { type: 'message', text: gateMessage }
 
   // 1. Load or create quote_session
+  console.log('handleConversation called — userId:', userId, 'threadId:', threadId)
+
   let { data: session } = await supabase
     .from('quote_sessions')
     .select('*')
@@ -150,6 +154,10 @@ export async function handleConversation(
     .filter(b => b.type === 'text')
     .map(b => (b as { type: 'text'; text: string }).text)
     .join('')
+
+  console.log('Claude raw response:', assistantText)
+  console.log('Action detected:', assistantText.includes('generate_quote'))
+  console.log('Current session state:', session.state)
 
   // Append assistant reply to history
   messages.push({ role: 'assistant', content: assistantText })
