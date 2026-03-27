@@ -29,10 +29,10 @@ export default function SignupPage() {
       email: email.trim(),
       options: {
         emailRedirectTo,
+        shouldCreateUser: true,
         data: {
           full_name: fullName.trim(),
           business_name: businessName.trim(),
-          is_new_signup: true,
         },
       },
     })

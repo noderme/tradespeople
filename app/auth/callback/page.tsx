@@ -13,23 +13,15 @@ function AuthCallback() {
     const isSignup = searchParams.get('signup') === '1'
     console.log('isSignup:', isSignup)
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event !== 'SIGNED_IN' && event !== 'INITIAL_SESSION') return
-      subscription.unsubscribe()
-
+    async function handleSession(session: { user: { id: string; email?: string; user_metadata?: Record<string, string> } } | null) {
       if (!session) {
         console.log('No session — redirecting to login')
         window.location.href = '/login?error=' + encodeURIComponent('Authentication failed. Please try again.')
         return
       }
 
-      const { data: { user } } = await supabase.auth.getUser()
-      console.log('User:', user?.id)
-
-      if (!user) {
-        window.location.href = '/login?error=' + encodeURIComponent('Authentication failed. Please try again.')
-        return
-      }
+      const user = session.user
+      console.log('User:', user.id)
 
       const { data: profile } = await supabase
         .from('users')
@@ -50,14 +42,12 @@ function AuthCallback() {
             plan: 'trial',
             trial_ends_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           })
-
           if (insertError) {
             console.error('Profile insert error:', insertError.message)
             setError('Failed to create profile. Please try again.')
             return
           }
         }
-
         console.log('Redirecting to: /onboarding')
         window.location.href = '/onboarding'
         return
@@ -66,9 +56,28 @@ function AuthCallback() {
       const destination = profile.trade_type ? '/dashboard' : '/onboarding'
       console.log('Redirecting to:', destination)
       window.location.href = destination
+    }
+
+    // Only listen for SIGNED_IN — INITIAL_SESSION fires too early (before hash is processed)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event)
+      if (event !== 'SIGNED_IN') return
+      subscription.unsubscribe()
+      handleSession(session)
     })
 
-    return () => subscription.unsubscribe()
+    // Fallback: if SIGNED_IN never fires, check session directly after 3s
+    const timeout = setTimeout(async () => {
+      subscription.unsubscribe()
+      const { data: { session } } = await supabase.auth.getSession()
+      console.log('Fallback session:', session?.user?.id)
+      handleSession(session)
+    }, 3000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [searchParams])
 
   if (error) {
