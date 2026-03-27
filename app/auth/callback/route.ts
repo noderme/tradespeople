@@ -6,7 +6,6 @@ import type { Database } from '@/types/database'
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   console.log('Callback URL:', request.url)
-  console.log('Has signup param:', searchParams.get('signup'))
 
   // Supabase sends ?error= when the link is expired, already used, or denied
   const supabaseError = searchParams.get('error_description') || searchParams.get('error')
@@ -14,9 +13,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(supabaseError)}`)
   }
 
-  const code        = searchParams.get('code')         // OAuth / PKCE flow
-  const token_hash  = searchParams.get('token_hash')   // Magic link / OTP flow
-  const type        = searchParams.get('type') as EmailOtpType | null
+  const code       = searchParams.get('code')
+  const token_hash = searchParams.get('token_hash')
+  const type       = searchParams.get('type') as EmailOtpType | null
 
   if (!code && !token_hash) {
     return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Invalid or expired link. Please request a new one.')}`)
@@ -55,11 +54,13 @@ export async function GET(request: NextRequest) {
     authError = error
   }
 
+  console.log('Auth result — user:', user?.id ?? null, 'error:', authError?.message ?? null)
+
   if (authError || !user) {
-    return NextResponse.redirect(`${origin}/login?error=auth_failed`)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Authentication failed. Please try again.')}`)
   }
 
-  // Check if user profile row already exists
+  // Profile exists → route based on onboarding status
   const { data: existing } = await supabase
     .from('users')
     .select('id, trade_type')
@@ -72,19 +73,9 @@ export async function GET(request: NextRequest) {
     return response
   }
 
-  // No profile found — check if this came from signup or a login attempt.
-  // Primary signal: ?signup=1 in the redirect URL (set by signup page, survives all redirects).
-  // Fallback: is_new_signup in user_metadata.
+  // No profile — auth succeeded so this is a valid user. Create profile and send to onboarding.
+  // (If they came via the login page with a fresh email, onboarding will collect what's needed.)
   const meta = user.user_metadata ?? {}
-  const isNewSignup = searchParams.get('signup') === '1' || meta.is_new_signup === true
-
-  if (!isNewSignup) {
-    // Someone tried to log in with an email that has no profile
-    await supabase.auth.signOut()
-    return NextResponse.redirect(`${origin}/signup?error=${encodeURIComponent('No account found. Create one first.')}`)
-  }
-
-  // New user from signup — create profile row
   const { error: insertError } = await supabase.from('users').insert({
     id: user.id,
     email: user.email!,
@@ -96,7 +87,7 @@ export async function GET(request: NextRequest) {
 
   if (insertError) {
     console.error('Failed to create user profile:', insertError.message)
-    return NextResponse.redirect(`${origin}/login?error=profile_failed`)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Failed to create profile. Please try again.')}`)
   }
 
   response.headers.set('Location', `${origin}/onboarding`)
