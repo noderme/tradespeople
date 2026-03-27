@@ -35,7 +35,7 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    const emailRedirectTo = `${window.location.origin}/auth/callback?signup=1`
+    const emailRedirectTo = 'https://quotejob.app/auth/callback?signup=1'
     console.log('emailRedirectTo:', emailRedirectTo)
     const { error } = await supabase.auth.signInWithOtp({
       email: email.trim(),
