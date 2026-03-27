@@ -70,10 +70,15 @@ export async function GET(request: NextRequest) {
     return response
   }
 
-  // No profile found — check if this came from signup or a login attempt
+  // No profile found — check if this came from signup or a login attempt.
+  // Use metadata flag OR creation timestamp (within 1 hour) as fallback,
+  // since metadata isn't always reliably returned after PKCE exchange.
   const meta = user.user_metadata ?? {}
-  if (!meta.is_new_signup) {
-    // Someone tried to log in with an email that has no account
+  const justCreated = Date.now() - new Date(user.created_at).getTime() < 60 * 60 * 1000
+  const isNewSignup = meta.is_new_signup === true || justCreated
+
+  if (!isNewSignup) {
+    // Someone tried to log in with an email that has no profile
     await supabase.auth.signOut()
     return NextResponse.redirect(`${origin}/signup?error=${encodeURIComponent('No account found. Create one first.')}`)
   }
