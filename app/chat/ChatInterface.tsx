@@ -121,17 +121,6 @@ export function ChatInterface({ userId }: { userId: string }) {
     }
   }
 
-  function startAnother() {
-    setMessages([{ role: 'bot', text: "Ready for the next one! Describe the job." }])
-    setStage('chatting')
-    setQuoteReady(null)
-    setEmail('')
-    setSendingEmail(false)
-    setEmailError(null)
-    setEmailSent(false)
-    inputRef.current?.focus()
-  }
-
   return (
     <div className="flex flex-col bg-neutral-950 text-neutral-100" style={{ height: '100dvh', overflow: 'hidden' }}>
 
@@ -206,19 +195,13 @@ export function ChatInterface({ userId }: { userId: string }) {
                 </>
               )}
 
-              {/* Subtle text links */}
-              <div className="flex gap-4 pt-1">
-                <button
-                  onClick={startAnother}
-                  className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-wider transition-colors"
-                >
-                  Start another job
-                </button>
+              {/* Dashboard link */}
+              <div className="pt-1">
                 <Link
                   href="/dashboard"
                   className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-wider transition-colors"
                 >
-                  Go to dashboard
+                  Go to Dashboard →
                 </Link>
               </div>
 
