@@ -189,7 +189,8 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
     size: 9, font: regular, color: COL_GRAY,
   })
 
-  const contact = `${user.whatsapp_number}  |  ${user.email}`
+  const contactParts = [user.business_phone ?? user.whatsapp_number, user.business_email ?? user.email].filter(Boolean)
+  const contact = contactParts.join('  |  ')
   rAlign(page, contact, PAGE_WIDTH - MARGIN, footerY, 9, regular, COL_GRAY)
 
   const pdfBytes = await pdfDoc.save()

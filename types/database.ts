@@ -29,6 +29,8 @@ export type Database = {
           trade_type: TradeType | null
           default_tax_rate: number
           currency: string
+          business_phone: string | null
+          business_email: string | null
         }
         Insert: {
           id?: string
@@ -45,6 +47,8 @@ export type Database = {
           trade_type?: TradeType | null
           default_tax_rate?: number
           currency?: string
+          business_phone?: string | null
+          business_email?: string | null
         }
         Update: {
           id?: string
@@ -61,6 +65,8 @@ export type Database = {
           trade_type?: TradeType | null
           default_tax_rate?: number
           currency?: string
+          business_phone?: string | null
+          business_email?: string | null
         }
         Relationships: []
       }

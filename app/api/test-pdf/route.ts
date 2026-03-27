@@ -42,6 +42,8 @@ export async function GET() {
     trade_type:             'plumber',
     default_tax_rate:       0,
     currency:               'USD',
+    business_phone:         '+44 7911 123456',
+    business_email:         'mike@mikesplumbing.com',
   }
 
   const buffer = await buildPdfBuffer(quote, user)

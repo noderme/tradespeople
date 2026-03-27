@@ -144,6 +144,34 @@ export function SettingsForm({ profile }: { profile: UserRow }) {
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
+              Business Phone
+            </label>
+            <input
+              name="business_phone"
+              type="tel"
+              defaultValue={profile.business_phone ?? ''}
+              placeholder="e.g. 07911 123456"
+              className="w-full px-4 py-3"
+            />
+            <p className="text-neutral-600 text-xs mt-1">Shown in PDF footer</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
+              Business Email
+            </label>
+            <input
+              name="business_email"
+              type="email"
+              defaultValue={profile.business_email ?? ''}
+              placeholder="e.g. quotes@mybusiness.com"
+              className="w-full px-4 py-3"
+            />
+            <p className="text-neutral-600 text-xs mt-1">Shown in PDF footer</p>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
               Default Tax Rate (%)
             </label>
             <input
