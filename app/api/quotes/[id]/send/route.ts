@@ -24,9 +24,13 @@ export async function POST(
 
   if (!quote || !profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const buffer   = await buildPdfBuffer(quote, profile)
-  const year     = new Date(quote.created_at).getFullYear()
-  const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
+  const buffer    = await buildPdfBuffer(quote, profile)
+  const year      = new Date(quote.created_at).getFullYear()
+  const quoteNum  = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
+  const currency  = profile.currency ?? 'USD'
+  const totalFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(quote.total))
+  const siteUrl   = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const acceptUrl = `${siteUrl}/quote/${quote.id}`
 
   if (!process.env.RESEND_API_KEY) {
     console.warn('RESEND_API_KEY not set — skipping email send')
@@ -44,7 +48,8 @@ export async function POST(
       <p>Hi,</p>
       <p>${profile.business_name} has sent you a quote (${quoteNum}).</p>
       <p>Please find the quote attached as a PDF.</p>
-      <p>Total: ${quoteNum}</p>
+      <p><strong>Total: ${totalFormatted}</strong></p>
+      <p>View and accept your quote online: <a href="${acceptUrl}">${acceptUrl}</a></p>
       <p>Thanks,<br/>${profile.business_name}</p>
     `,
     attachments: [

@@ -32,6 +32,9 @@ export function ChatInterface({ userId }: { userId: string }) {
   const [quoteReady,  setQuoteReady]  = useState<QuoteReady | null>(null)
   const [email,       setEmail]       = useState('')
   const [copied,      setCopied]      = useState(false)
+  const [sendingEmail, setSendingEmail] = useState(false)
+  const [emailError,   setEmailError]   = useState<string | null>(null)
+  const [emailSent,    setEmailSent]    = useState(false)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -112,11 +115,38 @@ export function ChatInterface({ userId }: { userId: string }) {
     setStage('sent')
   }
 
+  function quoteAcceptUrl() {
+    if (!quoteReady) return ''
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+    return `${base}/quote/${quoteReady.quoteId}`
+  }
+
   async function copyLink() {
-    if (!quoteReady?.pdfUrl) return
-    await navigator.clipboard.writeText(quoteReady.pdfUrl)
+    await navigator.clipboard.writeText(quoteAcceptUrl())
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleEmailSend() {
+    if (!quoteReady || !email.trim()) return
+    setSendingEmail(true)
+    setEmailError(null)
+    try {
+      const res = await fetch(`/api/quotes/${quoteReady.quoteId}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error ?? 'Failed to send')
+      }
+      setEmailSent(true)
+    } catch (err: unknown) {
+      setEmailError(err instanceof Error ? err.message : 'Send failed')
+    } finally {
+      setSendingEmail(false)
+    }
   }
 
   function startOver() {
@@ -125,6 +155,9 @@ export function ChatInterface({ userId }: { userId: string }) {
     setQuoteReady(null)
     setEmail('')
     setCopied(false)
+    setSendingEmail(false)
+    setEmailError(null)
+    setEmailSent(false)
     inputRef.current?.focus()
   }
 
@@ -152,7 +185,7 @@ export function ChatInterface({ userId }: { userId: string }) {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div
-              className={`max-w-[82%] px-4 py-3 text-[15px] leading-relaxed ${
+              className={`max-w-[82%] px-4 py-3 text-[15px] leading-relaxed whitespace-pre-wrap ${
                 msg.role === 'user'
                   ? 'bg-orange-500 text-black font-medium rounded-2xl rounded-br-sm'
                   : 'bg-neutral-800 text-neutral-100 rounded-2xl rounded-bl-sm'
@@ -201,31 +234,51 @@ export function ChatInterface({ userId }: { userId: string }) {
         )}
 
         {/* ── Sent — show shareable link ──────────────────── */}
-        {stage === 'sent' && quoteReady?.pdfUrl && (
+        {stage === 'sent' && quoteReady && (
           <div className="flex justify-start">
             <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3">
               <div className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
                 Share with customer
               </div>
 
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Customer email (optional)"
-                className="w-full bg-neutral-700 text-neutral-100 px-3 py-2 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                style={{ fontSize: '16px' }}
-              />
+              {/* Email row */}
+              {emailSent ? (
+                <div className="text-green-400 text-sm font-bold uppercase tracking-wider">
+                  ✓ Email sent!
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => { setEmail(e.target.value); setEmailError(null) }}
+                    placeholder="Customer email"
+                    className="flex-1 bg-neutral-700 text-neutral-100 px-3 py-2 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                    style={{ fontSize: '16px' }}
+                  />
+                  <button
+                    onClick={handleEmailSend}
+                    disabled={!email.trim() || sendingEmail}
+                    className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
+                  >
+                    {sendingEmail ? '…' : 'Send →'}
+                  </button>
+                </div>
+              )}
+              {emailError && (
+                <div className="text-red-400 text-xs">{emailError}</div>
+              )}
 
+              {/* Copy link row */}
               <div className="flex gap-2">
                 <input
                   readOnly
-                  value={quoteReady.pdfUrl}
+                  value={quoteAcceptUrl()}
                   className="flex-1 bg-neutral-900 text-neutral-300 text-xs px-3 py-2 truncate focus:outline-none"
                 />
                 <button
                   onClick={copyLink}
-                  className="bg-orange-500 hover:bg-orange-400 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
+                  className="bg-neutral-700 hover:bg-neutral-600 text-neutral-100 text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
                 >
                   {copied ? 'Copied!' : 'Copy'}
                 </button>

@@ -25,7 +25,7 @@ RULES:
 3. Confirm what you captured before moving on: "Got it — pipe repair $120 ✓"
 4. If price is missing, ask once. If still missing, add as TBD and continue.
 5. After each item ask: "Anything else on this job?"
-6. When user signals done (no/nope/that's it/done/send it), show full summary with total.
+6. When user signals done (no/nope/that's it/done/send it), show full summary with total. Format the summary with each line item on its own line, then the total bold and on its own line at the bottom. Use plain text line breaks (not markdown).
 7. Keep replies under 3 lines. They're on a phone.
 8. After confirming the summary, ask for customer name.
 9. Once you have customer name, output ONLY this JSON (no other text):
@@ -135,13 +135,15 @@ export async function handleConversation(
 
   // 3. Load user settings + price memory for context
   const [{ data: userProfile }, { data: priceMemory }] = await Promise.all([
-    supabase.from('users').select('default_tax_rate').eq('id', userId).single(),
+    supabase.from('users').select('*').eq('id', userId).single(),
     supabase.from('price_memory').select('job_type, last_labor, last_total, use_count').eq('user_id', userId).order('use_count', { ascending: false }).limit(10),
   ])
 
   const taxRate = userProfile?.default_tax_rate ?? 0
+  const currency = userProfile?.currency ?? 'USD'
+  const currencySymbol = currency === 'GBP' ? '£' : currency === 'EUR' ? '€' : '$'
   const priceMemoryText = priceMemory?.length
-    ? priceMemory.map(p => `${p.job_type}: last total £${p.last_total ?? 'unknown'} (used ${p.use_count}x)`).join('\n')
+    ? priceMemory.map(p => `${p.job_type}: last total ${currencySymbol}${p.last_total ?? 'unknown'} (used ${p.use_count}x)`).join('\n')
     : 'No previous jobs yet.'
 
   // 4. Call Claude
