@@ -41,6 +41,7 @@ RULES:
    }
 
 CRITICAL: Every line item MUST include the actual "unit_price" and "total" from the conversation — never 0. The "subtotal" and "total" fields must also be the real calculated amounts, not 0.
+IMPORTANT: Preserve the exact job description the tradesperson gives you. Never normalise or generalise — do not change "replaced kitchen faucet" to "Maintenance" or "Installation". Use their exact words in the line_items description field.
 IMPORTANT: Output ONLY the raw JSON object. No other text before or after it.`
 
 async function checkPlanAccess(userId: string): Promise<string | null> {
