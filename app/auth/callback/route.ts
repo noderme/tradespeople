@@ -64,8 +64,15 @@ export async function GET(request: NextRequest) {
     return response
   }
 
-  // New user — create profile row from metadata set during signup
+  // No profile found — check if this came from signup or a login attempt
   const meta = user.user_metadata ?? {}
+  if (!meta.is_new_signup) {
+    // Someone tried to log in with an email that has no account
+    await supabase.auth.signOut()
+    return NextResponse.redirect(`${origin}/signup?error=${encodeURIComponent('No account found. Create one first.')}`)
+  }
+
+  // New user from signup — create profile row
   const { error: insertError } = await supabase.from('users').insert({
     id: user.id,
     email: user.email!,
