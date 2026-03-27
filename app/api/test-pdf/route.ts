@@ -9,8 +9,9 @@ export async function GET() {
     id:            'b4e1f9c2-8d3a-4f7e-9b2c-1a3d5e7f9a3f',
     user_id:       'test-user',
     customer_id:   null,
-    customer_name: 'John Smith',
-    status:        'draft',
+    customer_name:    'John Smith',
+    customer_address: '42 Oak Street, Manchester',
+    status:           'draft',
     line_items: [
       { description: 'Pipe repair',        quantity: 1, unit_price: 120, total: 120 },
       { description: 'Leakage fix',        quantity: 1, unit_price: 345, total: 345 },

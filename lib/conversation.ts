@@ -8,6 +8,8 @@ interface QuoteTrigger {
   action: 'generate_quote'
   line_items: LineItem[]
   customer_name: string
+  customer_address?: string
+  notes?: string
   subtotal: number
   total: number
 }
@@ -28,14 +30,17 @@ RULES:
 6. When user signals done (no/nope/that's it/done/send it), show full summary with total. Format the summary with each line item on its own line, then the total bold and on its own line at the bottom. Use plain text line breaks (not markdown).
 7. Keep replies under 3 lines. They're on a phone.
 8. After confirming the summary, ask for customer name.
-9. Once you have customer name, output ONLY this JSON (no other text):
+9. Once you have the customer name, ask EXACTLY ONCE: "Any extra details? (address, payment terms, warranty, notes) Or say 'skip' to generate now."
+10. If they reply with skip/no/nope/done/nothing/ok → set customer_address and notes to empty string. If they provide text → extract an address if mentioned (put in customer_address), put everything else in notes as-is. Then output ONLY this JSON (no other text):
    {
      "action": "generate_quote",
      "customer_name": "John Smith",
+     "customer_address": "42 Oak Street, Manchester",
      "line_items": [
        { "description": "Pipe repair", "quantity": 1, "unit_price": 120.00, "total": 120.00 },
        { "description": "Copper fittings x3", "quantity": 3, "unit_price": 15.00, "total": 45.00 }
      ],
+     "notes": "Payment due 30 days. 90-day warranty on parts.",
      "subtotal": 165.00,
      "total": 165.00
    }
@@ -279,12 +284,13 @@ export async function handleConversation(
       .insert({
         user_id: userId,
         customer_name: trigger.customer_name,
+        customer_address: trigger.customer_address || null,
         status: 'draft',
         line_items: lineItems,
         subtotal,
         tax_rate: taxRate,
         total,
-        notes: null,
+        notes: trigger.notes || null,
         pdf_url: null,
         sent_at: null,
         viewed_at: null,

@@ -179,17 +179,23 @@ export function ChatInterface({ userId }: { userId: string }) {
                       className="flex-1 bg-neutral-700 text-neutral-100 px-3 py-2 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500 disabled:opacity-40"
                       style={{ fontSize: '16px' }}
                     />
-                    <button
-                      onClick={handleEmailSend}
-                      disabled={!email.trim() || sendingEmail || quoteReady.pdfLoading}
-                      className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
-                    >
-                      {sendingEmail
-                        ? <><Spinner className="mr-1" />Sending…</>
-                        : quoteReady.pdfLoading
-                        ? <><Spinner className="mr-1" />Preparing…</>
-                        : 'Send to Customer →'}
-                    </button>
+                    {quoteReady.pdfLoading ? (
+                      // Actively working — bright orange, white spinner, not dead-looking
+                      <button
+                        disabled
+                        className="bg-orange-500 text-white text-xs font-bold uppercase tracking-wider px-3 py-2 whitespace-nowrap flex items-center gap-1"
+                      >
+                        <Spinner className="mr-1" />Preparing…
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleEmailSend}
+                        disabled={!email.trim() || sendingEmail}
+                        className="bg-orange-500 hover:bg-orange-400 disabled:opacity-50 text-black text-xs font-bold uppercase tracking-wider px-3 py-2 transition-colors whitespace-nowrap"
+                      >
+                        {sendingEmail ? <><Spinner className="mr-1" />Sending…</> : 'Send to Customer →'}
+                      </button>
+                    )}
                   </div>
                   {emailError && <div className="text-red-400 text-xs">{emailError}</div>}
                 </>
@@ -212,36 +218,38 @@ export function ChatInterface({ userId }: { userId: string }) {
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Input bar ────────────────────────────────────────── */}
-      <div
-        className="flex-none border-t border-neutral-800 bg-neutral-950 px-4 pt-3"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
-      >
-        <div className="flex gap-3 items-end">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={stage === 'chatting' ? 'Describe the job…' : 'Quote complete'}
-            disabled={sending || stage !== 'chatting'}
-            rows={2}
-            className="flex-1 bg-neutral-800 text-neutral-100 placeholder-neutral-500 px-4 py-3 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500 leading-snug disabled:opacity-40"
-            style={{ fontSize: '16px' }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || sending || stage !== 'chatting'}
-            className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-40 text-black font-bold uppercase tracking-widest text-sm px-5 transition-colors whitespace-nowrap"
-            style={{ minHeight: '44px', height: '60px' }}
-          >
-            {sending ? <><Spinner className="mr-1" />Sending…</> : 'Send →'}
-          </button>
+      {/* ── Input bar — only during active conversation ──────── */}
+      {stage === 'chatting' && (
+        <div
+          className="flex-none border-t border-neutral-800 bg-neutral-950 px-4 pt-3"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}
+        >
+          <div className="flex gap-3 items-end">
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe the job…"
+              disabled={sending}
+              rows={2}
+              className="flex-1 bg-neutral-800 text-neutral-100 placeholder-neutral-500 px-4 py-3 resize-none focus:outline-none focus:ring-1 focus:ring-orange-500 leading-snug disabled:opacity-40"
+              style={{ fontSize: '16px' }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || sending}
+              className="bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-40 text-black font-bold uppercase tracking-widest text-sm px-5 transition-colors whitespace-nowrap"
+              style={{ minHeight: '44px', height: '60px' }}
+            >
+              {sending ? <><Spinner className="mr-1" />Sending…</> : 'Send →'}
+            </button>
+          </div>
+          <p className="text-neutral-600 text-xs mt-2 text-center">
+            Enter to send · Shift+Enter for new line
+          </p>
         </div>
-        <p className="text-neutral-600 text-xs mt-2 text-center">
-          Enter to send · Shift+Enter for new line
-        </p>
-      </div>
+      )}
 
     </div>
   )

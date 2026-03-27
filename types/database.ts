@@ -106,6 +106,7 @@ export type Database = {
           user_id: string
           customer_id: string | null
           customer_name: string
+          customer_address: string | null
           status: QuoteStatus
           line_items: LineItem[]
           subtotal: number
@@ -123,6 +124,7 @@ export type Database = {
           user_id: string
           customer_id?: string | null
           customer_name: string
+          customer_address?: string | null
           status?: QuoteStatus
           line_items?: LineItem[]
           subtotal?: number
@@ -140,6 +142,7 @@ export type Database = {
           user_id?: string
           customer_id?: string | null
           customer_name?: string
+          customer_address?: string | null
           status?: QuoteStatus
           line_items?: LineItem[]
           subtotal?: number

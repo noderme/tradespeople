@@ -40,8 +40,9 @@ CREATE TABLE IF NOT EXISTS quotes (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   customer_id   UUID REFERENCES customers(id) ON DELETE SET NULL,
-  customer_name TEXT NOT NULL,
-  status        TEXT NOT NULL DEFAULT 'draft'
+  customer_name    TEXT NOT NULL,
+  customer_address TEXT,
+  status           TEXT NOT NULL DEFAULT 'draft'
                   CHECK (status IN ('draft','sent','viewed','accepted','declined')),
   line_items    JSONB NOT NULL DEFAULT '[]',
   subtotal      NUMERIC(12,2) NOT NULL DEFAULT 0,

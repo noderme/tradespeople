@@ -104,10 +104,14 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
   y -= 16
 
   page.drawText(quote.customer_name, { x: MARGIN, y, size: 13, font: bold, color: COL_BLACK })
-  y -= 14
-
-  // customer_id lookup omitted here — address will come from WhatsApp session data
   y -= 16
+
+  if (quote.customer_address) {
+    page.drawText(quote.customer_address, { x: MARGIN, y, size: 9, font: regular, color: COL_GRAY })
+    y -= 14
+  }
+
+  y -= 10
   line(page, MARGIN, y, PAGE_WIDTH - MARGIN, y)
   y -= 22
 
@@ -152,7 +156,35 @@ export async function buildPdfBuffer(quote: Quote, user: User): Promise<Buffer> 
   }
 
   line(page, MARGIN, y, tableR, y)
-  y -= 24
+  y -= 20
+
+  // ── NOTES (only if present) ───────────────────────────────────────────────────
+  if (quote.notes) {
+    page.drawText('Notes', { x: MARGIN, y, size: 8, font: bold, color: COL_GRAY })
+    y -= 14
+    // Wrap long notes text at ~90 chars
+    const words = quote.notes.split(' ')
+    let line_ = ''
+    for (const word of words) {
+      const test = line_ ? `${line_} ${word}` : word
+      if (regular.widthOfTextAtSize(test, 9) > CONTENT_W * 0.7) {
+        page.drawText(line_, { x: MARGIN, y, size: 9, font: regular, color: COL_BLACK })
+        y -= 13
+        line_ = word
+      } else {
+        line_ = test
+      }
+    }
+    if (line_) {
+      page.drawText(line_, { x: MARGIN, y, size: 9, font: regular, color: COL_BLACK })
+      y -= 13
+    }
+    y -= 10
+    line(page, MARGIN, y, tableR, y)
+    y -= 16
+  } else {
+    y -= 4
+  }
 
   // ── TOTALS ───────────────────────────────────────────────────────────────────
   const labelX = PAGE_WIDTH - MARGIN - 160
