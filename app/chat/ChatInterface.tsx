@@ -11,9 +11,11 @@ interface Message {
 
 interface QuoteReady {
   quoteId: string
+  pdfUrl: string | null
+  pdfLoading: boolean
 }
 
-type Stage = 'chatting' | 'quote_ready' | 'sending' | 'sent'
+type Stage = 'chatting' | 'quote_ready' | 'sent'
 
 const WELCOME = "Hey! Describe your first job and I'll generate a PDF quote in seconds."
 
@@ -23,24 +25,31 @@ export function ChatInterface({ userId }: { userId: string }) {
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef  = useRef<HTMLTextAreaElement>(null)
 
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'bot', text: WELCOME },
-  ])
+  const [messages,    setMessages]    = useState<Message[]>([{ role: 'bot', text: WELCOME }])
   const [input,       setInput]       = useState('')
   const [sending,     setSending]     = useState(false)
   const [stage,       setStage]       = useState<Stage>('chatting')
   const [quoteReady,  setQuoteReady]  = useState<QuoteReady | null>(null)
   const [email,       setEmail]       = useState('')
-  const [pdfUrl,      setPdfUrl]      = useState<string | null>(null)
   const [copied,      setCopied]      = useState(false)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, stage])
+  }, [messages, stage, quoteReady])
 
   const addBotMessage = useCallback((text: string) => {
     setMessages(prev => [...prev.filter(m => !m.loading), { role: 'bot', text }])
   }, [])
+
+  async function generatePdfUrl(quoteId: string) {
+    try {
+      const res = await fetch(`/api/chat/pdf/${quoteId}`, { method: 'POST' })
+      const { pdfUrl } = await res.json()
+      setQuoteReady(prev => prev ? { ...prev, pdfUrl, pdfLoading: false } : null)
+    } catch {
+      setQuoteReady(prev => prev ? { ...prev, pdfLoading: false } : null)
+    }
+  }
 
   async function sendMessage() {
     const text = input.trim()
@@ -67,9 +76,12 @@ export function ChatInterface({ userId }: { userId: string }) {
       if (result.type === 'message') {
         addBotMessage(result.text)
       } else if (result.type === 'quote_created') {
-        addBotMessage("Quote ready! Download the PDF or send it to your customer.")
-        setQuoteReady({ quoteId: result.quoteId })
+        addBotMessage("Your quote is ready.")
+        const initial: QuoteReady = { quoteId: result.quoteId, pdfUrl: null, pdfLoading: true }
+        setQuoteReady(initial)
         setStage('quote_ready')
+        // Generate + upload PDF immediately so the URL is ready for all three buttons
+        generatePdfUrl(result.quoteId)
       }
     } catch {
       addBotMessage('Something went wrong. Please try again.')
@@ -86,29 +98,23 @@ export function ChatInterface({ userId }: { userId: string }) {
     }
   }
 
-  async function handleDownloadPdf() {
+  function handleViewQuote() {
+    if (quoteReady?.pdfUrl) window.open(quoteReady.pdfUrl, '_blank')
+  }
+
+  function handleDownload() {
     if (!quoteReady) return
     window.open(`/api/chat/pdf/${quoteReady.quoteId}`, '_blank')
   }
 
   async function handleSendToCustomer() {
-    if (!quoteReady) return
-    setStage('sending')
-
-    try {
-      const res = await fetch(`/api/chat/pdf/${quoteReady.quoteId}`, { method: 'POST' })
-      const { pdfUrl: url } = await res.json()
-      setPdfUrl(url)
-      setStage('sent')
-    } catch {
-      addBotMessage('Failed to generate PDF link. Try downloading instead.')
-      setStage('quote_ready')
-    }
+    if (!quoteReady?.pdfUrl) return
+    setStage('sent')
   }
 
   async function copyLink() {
-    if (!pdfUrl) return
-    await navigator.clipboard.writeText(pdfUrl)
+    if (!quoteReady?.pdfUrl) return
+    await navigator.clipboard.writeText(quoteReady.pdfUrl)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -117,7 +123,6 @@ export function ChatInterface({ userId }: { userId: string }) {
     setMessages([{ role: 'bot', text: "Quote sent! Start another job — describe it below." }])
     setStage('chatting')
     setQuoteReady(null)
-    setPdfUrl(null)
     setEmail('')
     setCopied(false)
     inputRef.current?.focus()
@@ -158,51 +163,64 @@ export function ChatInterface({ userId }: { userId: string }) {
           </div>
         ))}
 
-        {/* ── Quote ready actions ────────────────────────── */}
-        {(stage === 'quote_ready' || stage === 'sending') && quoteReady && (
+        {/* ── Quote ready actions ─────────────────────────── */}
+        {stage === 'quote_ready' && quoteReady && (
           <div className="flex justify-start">
-            <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3">
+            <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-2">
+
+              {/* 1. Primary: View Quote */}
               <button
-                onClick={handleDownloadPdf}
-                className="w-full bg-neutral-700 hover:bg-neutral-600 active:bg-neutral-500 text-neutral-100 font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
+                onClick={handleViewQuote}
+                disabled={quoteReady.pdfLoading || !quoteReady.pdfUrl}
+                className="w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-50 text-black font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
                 style={{ minHeight: '44px', padding: '12px' }}
               >
-                <span>↓</span> Download PDF
+                {quoteReady.pdfLoading ? 'Preparing PDF…' : '↗ View Quote'}
               </button>
+
+              {/* 2. Secondary: Download */}
+              <button
+                onClick={handleDownload}
+                className="w-full bg-neutral-700 hover:bg-neutral-600 active:bg-neutral-500 text-neutral-100 font-bold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2"
+                style={{ minHeight: '44px', padding: '10px' }}
+              >
+                ↓ Download
+              </button>
+
+              {/* 3. Send to Customer */}
               <button
                 onClick={handleSendToCustomer}
-                disabled={stage === 'sending'}
-                className="w-full bg-orange-500 hover:bg-orange-400 active:bg-orange-600 disabled:opacity-60 text-black font-bold uppercase tracking-wider text-sm transition-colors flex items-center justify-center gap-2"
-                style={{ minHeight: '44px', padding: '12px' }}
+                disabled={quoteReady.pdfLoading || !quoteReady.pdfUrl}
+                className="w-full bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-700 disabled:opacity-50 border border-neutral-600 text-neutral-300 font-bold uppercase tracking-wider text-xs transition-colors flex items-center justify-center gap-2"
+                style={{ minHeight: '44px', padding: '10px' }}
               >
-                {stage === 'sending' ? 'Generating link…' : <><span>✉</span> Send to Customer</>}
+                ✉ Send to Customer
               </button>
             </div>
           </div>
         )}
 
-        {/* ── Sent — show shareable link ─────────────────── */}
-        {stage === 'sent' && (
+        {/* ── Sent — show shareable link ──────────────────── */}
+        {stage === 'sent' && quoteReady?.pdfUrl && (
           <div className="flex justify-start">
             <div className="bg-neutral-800 rounded-2xl rounded-bl-sm px-4 py-4 max-w-[82%] w-full space-y-3">
-              <div className="text-xs uppercase tracking-widest text-neutral-400 font-bold mb-1">
-                PDF ready — share with customer
+              <div className="text-xs uppercase tracking-widest text-neutral-400 font-bold">
+                Share with customer
               </div>
 
-              {email !== undefined && (
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="Customer email (optional)"
-                  className="w-full bg-neutral-700 text-neutral-100 px-3 py-2 text-sm placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
-                />
-              )}
+              <input
+                type="email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                placeholder="Customer email (optional)"
+                className="w-full bg-neutral-700 text-neutral-100 px-3 py-2 placeholder-neutral-500 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                style={{ fontSize: '16px' }}
+              />
 
               <div className="flex gap-2">
                 <input
                   readOnly
-                  value={pdfUrl ?? ''}
+                  value={quoteReady.pdfUrl}
                   className="flex-1 bg-neutral-900 text-neutral-300 text-xs px-3 py-2 truncate focus:outline-none"
                 />
                 <button
