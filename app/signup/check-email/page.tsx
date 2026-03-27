@@ -17,6 +17,9 @@ export default function CheckEmailPage() {
           <p className="text-neutral-400 text-lg mb-4">
             We sent a magic link to your inbox. Click it to verify your account and continue setup.
           </p>
+          <p className="text-neutral-600 text-xs mb-4">
+            Open the link directly from your email app. Don&apos;t copy and paste it into a browser — it won&apos;t work.
+          </p>
           <p className="text-neutral-600 text-sm">
             Didn&apos;t get it? Check your spam folder or{' '}
             <a href="/signup" className="text-orange-500 hover:text-orange-400">

@@ -17,6 +17,9 @@ export default function LoginCheckEmailPage() {
           <p className="text-neutral-400 text-lg mb-4">
             Magic link sent. Click it to sign in — no password needed.
           </p>
+          <p className="text-neutral-600 text-xs mb-4">
+            Open the link directly from your email app. Don&apos;t copy and paste it into a browser — it won&apos;t work.
+          </p>
           <p className="text-neutral-600 text-sm">
             Didn&apos;t get it?{' '}
             <a href="/login" className="text-orange-500 hover:text-orange-400">
