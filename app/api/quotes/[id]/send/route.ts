@@ -29,7 +29,7 @@ export async function POST(
   const quoteNum  = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
   const currency  = profile.currency ?? 'USD'
   const totalFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(quote.total))
-  const siteUrl   = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+  const siteUrl   = process.env.NEXT_PUBLIC_APP_URL ?? ''
   const acceptUrl = `${siteUrl}/quote/${quote.id}`
 
   if (!process.env.RESEND_API_KEY) {

@@ -117,7 +117,7 @@ export function ChatInterface({ userId }: { userId: string }) {
 
   function quoteAcceptUrl() {
     if (!quoteReady) return ''
-    const base = process.env.NEXT_PUBLIC_SITE_URL ?? ''
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? ''
     return `${base}/quote/${quoteReady.quoteId}`
   }
 
