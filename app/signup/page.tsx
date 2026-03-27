@@ -1,8 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { Spinner } from '@/components/Spinner'
+
+const supabase = createSupabaseClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      flowType: 'implicit',
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+  }
+)
 
 export default function SignupPage() {
   const [fullName,     setFullName]     = useState('')
@@ -22,7 +35,6 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    const supabase = createClient()
     const emailRedirectTo = `${window.location.origin}/auth/callback?signup=1`
     console.log('emailRedirectTo:', emailRedirectTo)
     const { error } = await supabase.auth.signInWithOtp({
