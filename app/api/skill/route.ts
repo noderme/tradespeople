@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { handleConversation } from '@/lib/conversation'
-import type { LineItem } from '@/types/database'
-
-type QuoteStatus = 'draft' | 'pending' | 'sent' | 'accepted' | 'rejected' | 'cancelled'; // Define all possible quote statuses
+import type { LineItem, QuoteStatus } from '@/types/database'
 
 /**
  * SKILL AS A SERVICE (SkaaS) API
@@ -124,7 +122,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           .order('created_at', { ascending: false })
           .limit(limit)
 
-        const validQuoteStatuses: QuoteStatus[] = ['draft', 'pending', 'sent', 'accepted', 'rejected', 'cancelled'];
+        const validQuoteStatuses: QuoteStatus[] = ['draft', 'sent', 'viewed', 'accepted', 'declined'];
 
         if (status) {
           if (validQuoteStatuses.includes(status as QuoteStatus)) {
