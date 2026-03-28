@@ -78,8 +78,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       if (userRecord) {
         user_id = userRecord.id // Use the actual user ID from the database
       } else {
-        // If user not found by email, return an error or create a new user
-        // For now, let's return an error to prompt the user to register or provide a valid email
         return NextResponse.json(
           { success: false, action: 'user_lookup', error: 'Account not found for this email. Please register or provide a valid email.' },
           { status: 404 }
@@ -94,19 +92,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       )
     }
 
-
-
     // 3. Route to the appropriate handler
     switch (action) {
       case 'chat': {
-        // Handle conversational AI interaction (quote building)
         if (!data) {
           return NextResponse.json(
             { success: false, action: 'chat', error: 'Missing data object' },
             { status: 400 }
           )
         }
-        const { message, threadId } = data as { message: string; threadId: string }
+        const message = data.message as string;
+        const threadId = data.threadId as string;
+        
         if (!message || !threadId) {
           return NextResponse.json(
             { success: false, action: 'chat', error: 'Missing message or threadId' },
@@ -119,14 +116,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       }
 
       case 'get_price_history': {
-        // Get the plumber's previous pricing for a job type
         if (!data) {
           return NextResponse.json(
             { success: false, action: 'get_price_history', error: 'Missing data object' },
             { status: 400 }
           )
         }
-        const { job_type } = data as { job_type: string }
+        const job_type = data.job_type as string;
         if (!job_type) {
           return NextResponse.json(
             { success: false, action: 'get_price_history', error: 'Missing job_type' },
@@ -155,8 +151,8 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       }
 
       case 'get_quotes': {
-        // Get all quotes for the user (for dashboard-like queries)
-        const { limit = 10, status } = (data || {}) as { limit?: number; status?: string }
+        const limit = (data?.limit as number) || 10;
+        const status = data?.status as string;
 
         let query = supabase
           .from('quotes')
@@ -191,24 +187,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       }
 
       case 'create_quote': {
-        // Directly create a quote (for advanced AI use cases)
         if (!data) {
           return NextResponse.json(
             { success: false, action: 'create_quote', error: 'Missing data object' },
             { status: 400 }
           )
         }
-        const { customer_name, customer_address, line_items, notes, tax_rate } = data as {
-          customer_name: string
-          customer_address?: string
-          line_items: LineItem[]
-          notes?: string
-          tax_rate?: number
-        }
+        
+        const customer_name = data.customer_name as string;
+        const customer_address = data.customer_address as string;
+        const line_items = data.line_items as LineItem[];
+        const notes = data.notes as string;
+        const tax_rate = data.tax_rate as number;
 
         if (!customer_name || !line_items || line_items.length === 0) {
           return NextResponse.json(
-            { success: false, action: 'create_quote', error: 'Missing required fields' },
+            { success: false, action: 'create_quote', error: 'Missing required fields: customer_name or line_items' },
             { status: 400 }
           )
         }
@@ -221,7 +215,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           .single()
 
         const finalTaxRate = tax_rate ?? userProfile?.default_tax_rate ?? 0
-        const subtotal = line_items.reduce((sum, item) => sum + item.total, 0)
+        const subtotal = line_items.reduce((sum, item) => sum + (item.total || 0), 0)
         const total = subtotal * (1 + finalTaxRate)
 
         const { data: quote, error: quoteError } = await supabase
@@ -255,14 +249,15 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       }
 
       case 'send_quote': {
-        // Send a quote via email or other channels
         if (!data) {
           return NextResponse.json(
             { success: false, action: 'send_quote', error: 'Missing data object' },
             { status: 400 }
           )
         }
-        const { quote_id, email, phone } = data as { quote_id: string; email?: string; phone?: string }
+        const quote_id = data.quote_id as string;
+        const email = data.email as string;
+        const phone = data.phone as string;
 
         if (!quote_id || (!email && !phone)) {
           return NextResponse.json(
@@ -271,7 +266,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           )
         }
 
-        // Trigger the existing send endpoint
         // Trigger the existing send endpoint in a non-blocking way
         fetch(
           `https://quotejob.app/api/quotes/${quote_id}/send`,
@@ -282,7 +276,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           }
         ).catch(error => {
           console.error(`Background send quote failed for quote ${quote_id}:`, error);
-          // Log the error but don't block the response to the GPT
         });
 
         return NextResponse.json({
