@@ -100,6 +100,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
     switch (action) {
       case 'chat': {
         // Handle conversational AI interaction (quote building)
+        if (!data) {
+          return NextResponse.json(
+            { success: false, action: 'chat', error: 'Missing data object' },
+            { status: 400 }
+          )
+        }
         const { message, threadId } = data as { message: string; threadId: string }
         if (!message || !threadId) {
           return NextResponse.json(
@@ -114,6 +120,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
       case 'get_price_history': {
         // Get the plumber's previous pricing for a job type
+        if (!data) {
+          return NextResponse.json(
+            { success: false, action: 'get_price_history', error: 'Missing data object' },
+            { status: 400 }
+          )
+        }
         const { job_type } = data as { job_type: string }
         if (!job_type) {
           return NextResponse.json(
@@ -144,7 +156,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
       case 'get_quotes': {
         // Get all quotes for the user (for dashboard-like queries)
-        const { limit = 10, status } = data as { limit?: number; status?: string }
+        const { limit = 10, status } = (data || {}) as { limit?: number; status?: string }
 
         let query = supabase
           .from('quotes')
@@ -180,6 +192,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
       case 'create_quote': {
         // Directly create a quote (for advanced AI use cases)
+        if (!data) {
+          return NextResponse.json(
+            { success: false, action: 'create_quote', error: 'Missing data object' },
+            { status: 400 }
+          )
+        }
         const { customer_name, customer_address, line_items, notes, tax_rate } = data as {
           customer_name: string
           customer_address?: string
@@ -238,6 +256,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
       case 'send_quote': {
         // Send a quote via email or other channels
+        if (!data) {
+          return NextResponse.json(
+            { success: false, action: 'send_quote', error: 'Missing data object' },
+            { status: 400 }
+          )
+        }
         const { quote_id, email, phone } = data as { quote_id: string; email?: string; phone?: string }
 
         if (!quote_id || (!email && !phone)) {
