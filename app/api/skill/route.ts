@@ -122,7 +122,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           .order('created_at', { ascending: false })
           .limit(limit)
 
-        const validQuoteStatuses: QuoteStatus[] = ['draft', 'sent', 'viewed', 'accepted', 'declined'];
+        const validQuoteStatuses: QuoteStatus[] = ['draft', 'pending', 'sent', 'viewed', 'accepted', 'declined', 'cancelled'];
 
         if (status) {
           if (validQuoteStatuses.includes(status as QuoteStatus)) {
@@ -217,18 +217,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         }
 
         // Trigger the existing send endpoint
-        const sendResponse = await fetch(
+        // Trigger the existing send endpoint in a non-blocking way
+        fetch(
           `${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, phone }),
           }
-        )
-
-        if (!sendResponse.ok) {
-          throw new Error(`Failed to send quote: ${sendResponse.statusText}`)
-        }
+        ).catch(error => {
+          console.error(`Background send quote failed for quote ${quote_id}:`, error);
+          // Log the error but don't block the response to the GPT
+        });
 
         return NextResponse.json({
           success: true,
