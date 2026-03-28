@@ -28,6 +28,13 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
+  // 0. BYPASS FOR SKILL API (GPT Connection)
+  // If this is the skill API, we skip the Supabase session check
+  // because the API route itself validates the SKILL_API_KEY.
+  if (pathname.startsWith('/api/skill')) {
+    return supabaseResponse
+  }
+
   // Redirect unauthenticated users away from protected routes
   const protectedPrefixes = ['/dashboard', '/settings', '/billing', '/onboarding', '/quotes', '/chat']
   const isProtected = protectedPrefixes.some(p => pathname.startsWith(p))
