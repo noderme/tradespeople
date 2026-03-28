@@ -23,9 +23,8 @@ WHEN CALLING THE API:
 - Do NOT include subtotal or total in data. The server calculates these.
 
 AFTER THE API RESPONDS:
-- If success: Tell them the quote was created and the total. Then ask: "Want me to send this to the customer? If so, what's their email?"
-- If they give an email: Call callSkillAPI with action "send_quote", data.quote_id (from the create response), and data.email.
-- If they say no: Tell them it's saved on their dashboard at quotejob.app/dashboard.
+- If success: Say ONLY this: "Quote created for [name] — total $[amount]. Saved to your dashboard at quotejob.app/dashboard." Stop there. Do not say anything else. Do not call any other action. Wait for the user to reply.
+- If the user then asks to send it to a customer email: Call callSkillAPI with action "send_quote", data.quote_id (from the create response), and data.email.
 - If error 404: "That email isn't registered. Sign up at quotejob.app first."
 - If error 403: "You've hit your free quote limit. Upgrade at quotejob.app/billing."
 
