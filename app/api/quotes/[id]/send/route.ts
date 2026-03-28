@@ -8,18 +8,59 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  let userId: string | null = null
+  const service = createServiceClient()
+
+  // Auth method 1: SKILL_API_KEY (from GPT / external skill)
+  const authHeader = request.headers.get('Authorization')
+  const skillApiKey = process.env.SKILL_API_KEY
+  if (authHeader && skillApiKey && authHeader.replace('Bearer ', '') === skillApiKey) {
+    // Skill API call — get user_id from request body
+    const body = await request.json()
+    const { email, user_id } = body as { email?: string; user_id?: string }
+
+    if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 })
+
+    if (user_id) {
+      // user_id could be a UUID or an email
+      if (user_id.includes('@')) {
+        const { data: userRecord } = await service
+          .from('users')
+          .select('id')
+          .eq('email', user_id.toLowerCase())
+          .single()
+        if (userRecord) userId = userRecord.id
+      } else {
+        userId = user_id
+      }
+    }
+
+    if (!userId) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+
+    return await sendQuoteEmail(service, params.id, userId, email)
+  }
+
+  // Auth method 2: Supabase cookie auth (from web UI)
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { email } = await request.json()
+  const body = await request.json()
+  const { email } = body as { email?: string }
   if (!email) return NextResponse.json({ error: 'Missing email' }, { status: 400 })
 
-  const service = createServiceClient()
+  return await sendQuoteEmail(service, params.id, user.id, email)
+}
 
+async function sendQuoteEmail(
+  service: ReturnType<typeof createServiceClient>,
+  quoteId: string,
+  userId: string,
+  email: string
+) {
   const [{ data: quote }, { data: profile }] = await Promise.all([
-    service.from('quotes').select('*').eq('id', params.id).eq('user_id', user.id).single(),
-    service.from('users').select('*').eq('id', user.id).single(),
+    service.from('quotes').select('*').eq('id', quoteId).eq('user_id', userId).single(),
+    service.from('users').select('*').eq('id', userId).single(),
   ])
 
   if (!quote || !profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
@@ -69,7 +110,7 @@ export async function POST(
   await service
     .from('quotes')
     .update({ status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', params.id)
+    .eq('id', quoteId)
 
   return NextResponse.json({ ok: true })
 }

@@ -173,8 +173,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
         fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, phone }),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SKILL_API_KEY}`,
+          },
+          body: JSON.stringify({ email, phone, user_id }),
         }).catch(error => console.error(`Background send quote failed for quote ${quote_id}:`, error))
 
         return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email || phone}` } })
