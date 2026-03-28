@@ -2,6 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { handleConversation } from '@/lib/conversation'
+import { buildPdfBuffer } from '@/lib/generatePdf'
+import { Resend } from 'resend'
 import type { LineItem, QuoteStatus } from '@/types/database'
 
 /**
@@ -140,7 +142,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         if (userProfile.plan === 'trial' && quoteCount >= 10) {
           return NextResponse.json(
             { success: false, action: 'create_quote', error: 'Quote limit reached. Please upgrade your plan at quotejob.app/billing to create more quotes.' },
-            { status: 403 } // 403 Forbidden is perfect for this
+            { status: 403 }
           )
         }
 
@@ -169,33 +171,78 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         if (!data || !data.quote_id || (!data.email && !data.phone)) {
           return NextResponse.json({ success: false, action: 'send_quote', error: 'Missing quote_id and email/phone' }, { status: 400 })
         }
-        const { quote_id, email, phone } = data as { quote_id: string, email?: string, phone?: string }
+        const { quote_id, email } = data as { quote_id: string, email?: string, phone?: string }
 
-        const sendUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`
-        console.log('send_quote: calling', sendUrl, 'for user_id:', user_id, 'email:', email)
-
-        try {
-          const sendRes = await fetch(sendUrl, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.SKILL_API_KEY}`,
-            },
-            body: JSON.stringify({ email, phone, user_id }),
-          })
-
-          const sendBody = await sendRes.text()
-          console.log('send_quote: response status:', sendRes.status, 'body:', sendBody)
-
-          if (!sendRes.ok) {
-            return NextResponse.json({ success: false, action: 'send_quote', error: `Failed to send email: ${sendBody}` }, { status: sendRes.status })
-          }
-        } catch (fetchError) {
-          console.error('send_quote: fetch error:', fetchError)
-          return NextResponse.json({ success: false, action: 'send_quote', error: 'Failed to connect to send endpoint' }, { status: 500 })
+        if (!email) {
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'Email is required to send a quote' }, { status: 400 })
         }
 
-        return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email || phone}` } })
+        // Fetch quote and user profile directly (no internal HTTP call)
+        const [{ data: quote, error: quoteErr }, { data: profile, error: profileErr }] = await Promise.all([
+          supabase.from('quotes').select('*').eq('id', quote_id).eq('user_id', user_id).single(),
+          supabase.from('users').select('*').eq('id', user_id).single(),
+        ])
+
+        if (quoteErr || !quote) {
+          console.error('send_quote: quote not found', quoteErr)
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'Quote not found' }, { status: 404 })
+        }
+        if (profileErr || !profile) {
+          console.error('send_quote: profile not found', profileErr)
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'User profile not found' }, { status: 404 })
+        }
+
+        // Build PDF
+        const buffer = await buildPdfBuffer(quote, profile)
+        const year = new Date(quote.created_at).getFullYear()
+        const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
+        const currency = profile.currency ?? 'USD'
+        const totalFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(quote.total))
+        const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+        const acceptUrl = `${siteUrl}/quote/${quote.id}`
+
+        // Send email via Resend
+        if (!process.env.RESEND_API_KEY) {
+          console.warn('RESEND_API_KEY not set')
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'Email service not configured' }, { status: 500 })
+        }
+
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const from = process.env.RESEND_FROM_EMAIL ?? 'quotes@resend.dev'
+
+        const { error: sendError } = await resend.emails.send({
+          from,
+          to: email,
+          subject: `Quote ${quoteNum} from ${profile.business_name}`,
+          html: `
+            <p>Hi,</p>
+            <p>${profile.business_name} has sent you a quote (${quoteNum}).</p>
+            <p>Please find the quote attached as a PDF.</p>
+            <p><strong>Total: ${totalFormatted}</strong></p>
+            <p>View and accept your quote online: <a href="${acceptUrl}">${acceptUrl}</a></p>
+            <p>Thanks,<br/>${profile.business_name}</p>
+          `,
+          attachments: [
+            {
+              filename: `${quoteNum}.pdf`,
+              content: buffer,
+            },
+          ],
+        })
+
+        if (sendError) {
+          console.error('send_quote: Resend error:', sendError)
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'Failed to send email' }, { status: 500 })
+        }
+
+        // Update quote status to 'sent'
+        await supabase
+          .from('quotes')
+          .update({ status: 'sent', sent_at: new Date().toISOString() })
+          .eq('id', quote_id)
+
+        console.log('send_quote: email sent successfully to', email)
+        return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email}` } })
       }
 
       default:
@@ -209,4 +256,3 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
     )
   }
 }
-
