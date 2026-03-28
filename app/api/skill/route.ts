@@ -43,6 +43,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
     }
 
     const body = (await request.json()) as SkillRequest
+    console.log('Incoming Skill API Request Body:', JSON.stringify(body, null, 2))
     const { action, data } = body
     let { user_id } = body
 
