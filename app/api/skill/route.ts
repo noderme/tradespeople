@@ -54,7 +54,38 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
     // 2. Parse request body
     const body = (await request.json()) as SkillRequest
-    const { action, user_id, data } = body
+    const { action, data } = body
+    let { user_id } = body
+
+    const supabase = createServiceClient()
+
+    // If user_id looks like an email, try to find the actual user_id from the users table
+    if (user_id && user_id.includes('@')) {
+      const { data: userRecord, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', user_id)
+        .single()
+
+      if (userError && userError.code !== 'PGRST116') {
+        console.error('Error looking up user by email:', userError)
+        return NextResponse.json(
+          { success: false, action: 'user_lookup', error: 'Failed to lookup user by email' },
+          { status: 500 }
+        )
+      }
+
+      if (userRecord) {
+        user_id = userRecord.id // Use the actual user ID from the database
+      } else {
+        // If user not found by email, return an error or create a new user
+        // For now, let's return an error to prompt the user to register or provide a valid email
+        return NextResponse.json(
+          { success: false, action: 'user_lookup', error: 'Account not found for this email. Please register or provide a valid email.' },
+          { status: 404 }
+        )
+      }
+    }
 
     if (!action || !user_id) {
       return NextResponse.json(
@@ -63,7 +94,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       )
     }
 
-    const supabase = createServiceClient()
+
 
     // 3. Route to the appropriate handler
     switch (action) {
@@ -219,7 +250,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         // Trigger the existing send endpoint
         // Trigger the existing send endpoint in a non-blocking way
         fetch(
-          `${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`,
+          `https://quotejob.app/api/quotes/${quote_id}/send`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
