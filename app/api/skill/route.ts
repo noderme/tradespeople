@@ -1,3 +1,4 @@
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { handleConversation } from '@/lib/conversation'
@@ -5,12 +6,6 @@ import type { LineItem, QuoteStatus } from '@/types/database'
 
 /**
  * SKILL AS A SERVICE (SkaaS) API
- * 
- * This endpoint allows external AI agents (Manus, ChatGPT, Claude) to interact with
- * the Trade Quotes app's "brain" without needing the Web UI.
- * 
- * Authentication: API Key in Authorization header
- * Format: Authorization: Bearer {SKILL_API_KEY}
  */
 
 interface SkillRequest {
@@ -26,24 +21,19 @@ interface SkillResponse {
   error?: string
 }
 
-// Verify the API key from the request
 function verifySkillApiKey(authHeader: string | null): boolean {
   if (!authHeader) return false
-  
   const token = authHeader.replace('Bearer ', '')
   const validKey = process.env.SKILL_API_KEY
-  
   if (!validKey) {
     console.error('SKILL_API_KEY not configured in environment')
     return false
   }
-  
   return token === validKey
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<SkillResponse>> {
   try {
-    // 1. Verify API Key
     const authHeader = request.headers.get('Authorization')
     if (!verifySkillApiKey(authHeader)) {
       return NextResponse.json(
@@ -52,14 +42,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       )
     }
 
-    // 2. Parse request body
     const body = (await request.json()) as SkillRequest
     const { action, data } = body
     let { user_id } = body
 
     const supabase = createServiceClient()
 
-    // If user_id looks like an email, try to find the actual user_id from the users table
     if (user_id && user_id.includes('@')) {
       const { data: userRecord, error: userError } = await supabase
         .from('users')
@@ -67,19 +55,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         .eq('email', user_id)
         .single()
 
-      if (userError && userError.code !== 'PGRST116') {
-        console.error('Error looking up user by email:', userError)
-        return NextResponse.json(
-          { success: false, action: 'user_lookup', error: 'Failed to lookup user by email' },
-          { status: 500 }
-        )
-      }
+      if (userError && userError.code !== 'PGRST116') throw userError
 
       if (userRecord) {
-        user_id = userRecord.id // Use the actual user ID from the database
+        user_id = userRecord.id
       } else {
         return NextResponse.json(
-          { success: false, action: 'user_lookup', error: 'Account not found for this email. Please register or provide a valid email.' },
+          { success: false, action: 'user_lookup', error: 'Account not found. Please register or provide a valid email.' },
           { status: 404 }
         )
       }
@@ -92,127 +74,80 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       )
     }
 
-    // 3. Route to the appropriate handler
     switch (action) {
       case 'chat': {
-        if (!data) {
-          return NextResponse.json(
-            { success: false, action: 'chat', error: 'Missing data object' },
-            { status: 400 }
-          )
+        if (!data || !data.message || !data.threadId) {
+          return NextResponse.json({ success: false, action: 'chat', error: 'Missing message or threadId' }, { status: 400 })
         }
-        const message = data.message as string;
-        const threadId = data.threadId as string;
-        
-        if (!message || !threadId) {
-          return NextResponse.json(
-            { success: false, action: 'chat', error: 'Missing message or threadId' },
-            { status: 400 }
-          )
-        }
-
-        const result = await handleConversation(user_id, message, threadId)
+        const result = await handleConversation(user_id, data.message as string, data.threadId as string)
         return NextResponse.json({ success: true, action: 'chat', result })
       }
 
       case 'get_price_history': {
-        if (!data) {
-          return NextResponse.json(
-            { success: false, action: 'get_price_history', error: 'Missing data object' },
-            { status: 400 }
-          )
+        if (!data || !data.job_type) {
+          return NextResponse.json({ success: false, action: 'get_price_history', error: 'Missing job_type' }, { status: 400 })
         }
-        const job_type = data.job_type as string;
-        if (!job_type) {
-          return NextResponse.json(
-            { success: false, action: 'get_price_history', error: 'Missing job_type' },
-            { status: 400 }
-          )
-        }
-
         const { data: priceMemory, error } = await supabase
           .from('price_memory')
           .select('*')
           .eq('user_id', user_id)
-          .eq('job_type', job_type.toLowerCase())
+          .eq('job_type', (data.job_type as string).toLowerCase())
           .order('use_count', { ascending: false })
           .limit(1)
           .single()
 
-        if (error && error.code !== 'PGRST116') {
-          throw error
-        }
-
-        return NextResponse.json({
-          success: true,
-          action: 'get_price_history',
-          result: priceMemory || { message: 'No previous pricing found for this job type' },
-        })
+        if (error && error.code !== 'PGRST116') throw error
+        return NextResponse.json({ success: true, action: 'get_price_history', result: priceMemory || { message: 'No previous pricing found' } })
       }
 
       case 'get_quotes': {
-        const limit = (data?.limit as number) || 10;
-        const status = data?.status as string;
-
-        let query = supabase
-          .from('quotes')
-          .select('*')
-          .eq('user_id', user_id)
-          .order('created_at', { ascending: false })
-          .limit(limit)
-
-        const validQuoteStatuses: QuoteStatus[] = ['draft', 'pending', 'sent', 'viewed', 'accepted', 'declined', 'cancelled'];
-
-        if (status) {
-          if (validQuoteStatuses.includes(status as QuoteStatus)) {
-            query = query.eq('status', status as QuoteStatus);
-          } else {
-            console.warn(`Invalid quote status provided: ${status}`);
-            return NextResponse.json(
-              { success: false, action: 'get_quotes', error: `Invalid status provided: ${status}` },
-              { status: 400 }
-            );
-          }
+        const limit = (data?.limit as number) || 10
+        const status = data?.status as string
+        let query = supabase.from('quotes').select('*').eq('user_id', user_id).order('created_at', { ascending: false }).limit(limit)
+        const validQuoteStatuses: QuoteStatus[] = ['draft', 'pending', 'sent', 'viewed', 'accepted', 'declined', 'cancelled']
+        if (status && validQuoteStatuses.includes(status as QuoteStatus)) {
+          query = query.eq('status', status as QuoteStatus)
         }
-
         const { data: quotes, error } = await query
-
         if (error) throw error
-
-        return NextResponse.json({
-          success: true,
-          action: 'get_quotes',
-          result: quotes,
-        })
+        return NextResponse.json({ success: true, action: 'get_quotes', result: quotes })
       }
 
       case 'create_quote': {
         if (!data) {
-          return NextResponse.json(
-            { success: false, action: 'create_quote', error: 'Missing data object' },
-            { status: 400 }
-          )
-        }
-        
-        const customer_name = data.customer_name as string;
-        const customer_address = data.customer_address as string;
-        const line_items = data.line_items as LineItem[];
-        const notes = data.notes as string;
-        const tax_rate = data.tax_rate as number;
-
-        if (!customer_name || !line_items || line_items.length === 0) {
-          return NextResponse.json(
-            { success: false, action: 'create_quote', error: 'Missing required fields: customer_name or line_items' },
-            { status: 400 }
-          )
+          return NextResponse.json({ success: false, action: 'create_quote', error: 'Missing data object' }, { status: 400 })
         }
 
-        // Get user's default tax rate if not provided
-        const { data: userProfile } = await supabase
+        // 1. Get user profile and quote count simultaneously
+        const { data: userProfile, error: profileError } = await supabase
           .from('users')
-          .select('default_tax_rate')
+          .select('plan, default_tax_rate')
           .eq('id', user_id)
           .single()
+
+        if (profileError) throw profileError
+
+        const { count: quoteCountRaw, error: countError } = await supabase
+          .from('quotes')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user_id)
+
+        if (countError) throw countError
+        const quoteCount = quoteCountRaw ?? 0;
+
+        // 2. Enforce plan limits
+        if (userProfile.plan === 'trial' && quoteCount >= 10) {
+          return NextResponse.json(
+            { success: false, action: 'create_quote', error: 'Quote limit reached. Please upgrade your plan at quotejob.app/billing to create more quotes.' },
+            { status: 403 } // 403 Forbidden is perfect for this
+          )
+        }
+
+        const { customer_name, customer_address, line_items, notes, tax_rate } = data as { customer_name: string, customer_address?: string, line_items: LineItem[], notes?: string, tax_rate?: number }
+
+        if (!customer_name || !line_items || line_items.length === 0) {
+          return NextResponse.json({ success: false, action: 'create_quote', error: 'Missing required fields: customer_name or line_items' }, { status: 400 })
+        }
 
         const finalTaxRate = tax_rate ?? userProfile?.default_tax_rate ?? 0
         const subtotal = line_items.reduce((sum, item) => sum + (item.total || 0), 0)
@@ -220,86 +155,39 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
         const { data: quote, error: quoteError } = await supabase
           .from('quotes')
-          .insert({
-            user_id,
-            customer_name,
-            customer_address: customer_address || null,
-            status: 'draft',
-            line_items,
-            subtotal,
-            tax_rate: finalTaxRate,
-            total,
-            notes: notes || null,
-            pdf_url: null,
-            sent_at: null,
-            viewed_at: null,
-            accepted_at: null,
-            customer_id: null,
-          })
+          .insert({ user_id, customer_name, customer_address, status: 'draft', line_items, subtotal, tax_rate: finalTaxRate, total, notes })
           .select()
           .single()
 
-        if (quoteError || !quote) throw quoteError
+        if (quoteError) throw quoteError
 
-        return NextResponse.json({
-          success: true,
-          action: 'create_quote',
-          result: { quote_id: quote.id, total, message: `Quote created for ${customer_name}` },
-        })
+        return NextResponse.json({ success: true, action: 'create_quote', result: { quote_id: quote.id, total, message: `Quote created for ${customer_name}` } })
       }
 
       case 'send_quote': {
-        if (!data) {
-          return NextResponse.json(
-            { success: false, action: 'send_quote', error: 'Missing data object' },
-            { status: 400 }
-          )
+        if (!data || !data.quote_id || (!data.email && !data.phone)) {
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'Missing quote_id and email/phone' }, { status: 400 })
         }
-        const quote_id = data.quote_id as string;
-        const email = data.email as string;
-        const phone = data.phone as string;
+        const { quote_id, email, phone } = data as { quote_id: string, email?: string, phone?: string }
 
-        if (!quote_id || (!email && !phone)) {
-          return NextResponse.json(
-            { success: false, action: 'send_quote', error: 'Missing quote_id and email/phone' },
-            { status: 400 }
-          )
-        }
+        fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, phone }),
+        }).catch(error => console.error(`Background send quote failed for quote ${quote_id}:`, error))
 
-        // Trigger the existing send endpoint in a non-blocking way
-        fetch(
-          `https://quotejob.app/api/quotes/${quote_id}/send`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, phone }),
-          }
-        ).catch(error => {
-          console.error(`Background send quote failed for quote ${quote_id}:`, error);
-        });
-
-        return NextResponse.json({
-          success: true,
-          action: 'send_quote',
-          result: { message: `Quote sent to ${email || phone}` },
-        })
+        return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email || phone}` } })
       }
 
       default:
-        return NextResponse.json(
-          { success: false, action: 'unknown', error: `Unknown action: ${action}` },
-          { status: 400 }
-        )
+        return NextResponse.json({ success: false, action: 'unknown', error: `Unknown action: ${action}` }, { status: 400 })
     }
   } catch (error) {
     console.error('Skill API error:', error)
     return NextResponse.json(
-      {
-        success: false,
-        action: 'error',
-        error: error instanceof Error ? error.message : 'Internal server error',
-      },
+      { success: false, action: 'error', error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
     )
   }
 }
+
