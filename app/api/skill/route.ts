@@ -133,7 +133,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           .eq('user_id', user_id)
 
         if (countError) throw countError
-        const quoteCount = quoteCountRaw ?? 0;
+        const quoteCount = (quoteCountRaw ?? 0) as number;
 
         // 2. Enforce plan limits
         if (userProfile.plan === 'trial' && quoteCount >= 10) {
