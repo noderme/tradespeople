@@ -3,6 +3,8 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { handleConversation } from '@/lib/conversation'
 import type { LineItem } from '@/types/database'
 
+type QuoteStatus = 'draft' | 'pending' | 'sent' | 'accepted' | 'rejected' | 'cancelled'; // Define all possible quote statuses
+
 /**
  * SKILL AS A SERVICE (SkaaS) API
  * 
@@ -122,8 +124,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           .order('created_at', { ascending: false })
           .limit(limit)
 
+        const validQuoteStatuses: QuoteStatus[] = ['draft', 'pending', 'sent', 'accepted', 'rejected', 'cancelled'];
+
         if (status) {
-          query = query.eq('status', status)
+          if (validQuoteStatuses.includes(status as QuoteStatus)) {
+            query = query.eq('status', status as QuoteStatus);
+          } else {
+            console.warn(`Invalid quote status provided: ${status}`);
+            return NextResponse.json(
+              { success: false, action: 'get_quotes', error: `Invalid status provided: ${status}` },
+              { status: 400 }
+            );
+          }
         }
 
         const { data: quotes, error } = await query
