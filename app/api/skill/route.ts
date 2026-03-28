@@ -171,14 +171,29 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         }
         const { quote_id, email, phone } = data as { quote_id: string, email?: string, phone?: string }
 
-        fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SKILL_API_KEY}`,
-          },
-          body: JSON.stringify({ email, phone, user_id }),
-        }).catch(error => console.error(`Background send quote failed for quote ${quote_id}:`, error))
+        const sendUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/quotes/${quote_id}/send`
+        console.log('send_quote: calling', sendUrl, 'for user_id:', user_id, 'email:', email)
+
+        try {
+          const sendRes = await fetch(sendUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.SKILL_API_KEY}`,
+            },
+            body: JSON.stringify({ email, phone, user_id }),
+          })
+
+          const sendBody = await sendRes.text()
+          console.log('send_quote: response status:', sendRes.status, 'body:', sendBody)
+
+          if (!sendRes.ok) {
+            return NextResponse.json({ success: false, action: 'send_quote', error: `Failed to send email: ${sendBody}` }, { status: sendRes.status })
+          }
+        } catch (fetchError) {
+          console.error('send_quote: fetch error:', fetchError)
+          return NextResponse.json({ success: false, action: 'send_quote', error: 'Failed to connect to send endpoint' }, { status: 500 })
+        }
 
         return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email || phone}` } })
       }
