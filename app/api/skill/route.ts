@@ -52,7 +52,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       const { data: userRecord, error: userError } = await supabase
         .from('users')
         .select('id')
-        .eq('email', user_id)
+        .eq('email', user_id.toLowerCase())
         .single()
 
       if (userError && userError.code !== 'PGRST116') throw userError
