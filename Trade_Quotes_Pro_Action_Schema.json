@@ -1,0 +1,137 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Trade Quotes Pro Skill API",
+    "description": "API for creating and managing trade quotes.",
+    "version": "2.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://www.quotejob.app"
+    }
+  ],
+  "paths": {
+    "/api/skill": {
+      "post": {
+        "operationId": "callSkillAPI",
+        "summary": "Create a quote, send a quote, or retrieve quotes for a tradesperson.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["action", "user_id"],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": ["create_quote", "send_quote", "get_quotes"],
+                    "description": "The action to perform."
+                  },
+                  "user_id": {
+                    "type": "string",
+                    "description": "The tradesperson's email address, e.g. user@example.com"
+                  },
+                  "data": {
+                    "type": "object",
+                    "description": "The payload for the action. Required for create_quote and send_quote.",
+                    "properties": {
+                      "customer_name": {
+                        "type": "string",
+                        "description": "Name of the customer receiving the quote."
+                      },
+                      "customer_address": {
+                        "type": "string",
+                        "description": "Address of the customer. Optional."
+                      },
+                      "line_items": {
+                        "type": "array",
+                        "description": "List of services/materials being quoted.",
+                        "items": {
+                          "type": "object",
+                          "required": ["description", "quantity", "unit_price", "total"],
+                          "properties": {
+                            "description": {
+                              "type": "string",
+                              "description": "Description of the service or material, using the tradesperson's exact words."
+                            },
+                            "quantity": {
+                              "type": "number",
+                              "description": "Quantity of the item. Default 1."
+                            },
+                            "unit_price": {
+                              "type": "number",
+                              "description": "Price per unit."
+                            },
+                            "total": {
+                              "type": "number",
+                              "description": "Total for this line item (quantity * unit_price)."
+                            }
+                          }
+                        }
+                      },
+                      "notes": {
+                        "type": "string",
+                        "description": "Additional notes such as payment terms or warranty info. Optional."
+                      },
+                      "tax_rate": {
+                        "type": "number",
+                        "description": "Tax rate as a decimal (e.g. 0.1 for 10%). Optional, server uses user default if omitted."
+                      },
+                      "quote_id": {
+                        "type": "string",
+                        "description": "The ID of the quote to send. Required for send_quote action."
+                      },
+                      "email": {
+                        "type": "string",
+                        "description": "Email address to send the quote to. Used with send_quote action."
+                      },
+                      "phone": {
+                        "type": "string",
+                        "description": "Phone number to send the quote to. Used with send_quote action."
+                      },
+                      "limit": {
+                        "type": "number",
+                        "description": "Number of quotes to retrieve. Used with get_quotes action. Default 10."
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": ["draft", "pending", "sent", "viewed", "accepted", "declined", "cancelled"],
+                        "description": "Filter quotes by status. Used with get_quotes action."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "action": { "type": "string" },
+                    "result": {
+                      "type": "object",
+                      "properties": {
+                        "quote_id": { "type": "string" },
+                        "total": { "type": "number" },
+                        "message": { "type": "string" }
+                      }
+                    },
+                    "error": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
