@@ -1,5 +1,5 @@
 export type Plan = 'trial' | 'starter' | 'pro' | 'team' | 'canceled'
-export type QuoteStatus = 'draft' | 'sent' | 'viewed' | 'accepted' | 'declined'
+export type QuoteStatus = 'draft' | 'pending' | 'sent' | 'viewed' | 'accepted' | 'declined' | 'cancelled'
 export type SessionState = 'collecting' | 'reviewing' | 'customer_info' | 'sending' | 'complete'
 export type TradeType = 'plumber' | 'electrician' | 'hvac' | 'roofer' | 'other'
 

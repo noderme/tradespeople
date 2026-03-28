@@ -13,6 +13,8 @@ const STATUS_STYLES: Record<QuoteStatus, string> = {
   viewed:   'bg-yellow-900/60 text-yellow-300',
   accepted: 'bg-green-900/60 text-green-300',
   declined: 'bg-red-900/60 text-red-400',
+  pending:  'bg-purple-900/60 text-purple-300',
+  cancelled: 'bg-gray-900/60 text-gray-400',
 }
 
 function formatDate(date: string) {
