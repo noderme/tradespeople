@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { buildPdfBuffer } from '@/lib/generatePdf'
+import { generateQuotePdf } from '@/lib/generatePdf'
 
 export async function POST(
   request: NextRequest,
@@ -65,13 +65,12 @@ async function sendQuoteEmail(
 
   if (!quote || !profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const buffer    = await buildPdfBuffer(quote, profile)
+  const buffer    = await generateQuotePdf(quote, profile)
   const year      = new Date(quote.created_at).getFullYear()
   const quoteNum  = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
   const currency  = profile.currency ?? 'USD'
   const totalFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(quote.total))
-  const siteUrl   = process.env.NEXT_PUBLIC_APP_URL ?? ''
-  const acceptUrl = `${siteUrl}/quote/${quote.id}`
+  const { data: { publicUrl: pdfUrl } } = service.storage.from('quotes').getPublicUrl(`quote-${quote.id}.pdf`)
 
   if (!process.env.RESEND_API_KEY) {
     console.warn('RESEND_API_KEY not set — skipping email send')
@@ -90,7 +89,7 @@ async function sendQuoteEmail(
       <p>${profile.business_name} has sent you a quote (${quoteNum}).</p>
       <p>Please find the quote attached as a PDF.</p>
       <p><strong>Total: ${totalFormatted}</strong></p>
-      <p>View and accept your quote online: <a href="${acceptUrl}">${acceptUrl}</a></p>
+      <p>View your quote online: <a href="${pdfUrl}">${pdfUrl}</a></p>
       <p>Thanks,<br/>${profile.business_name}</p>
     `,
     attachments: [
