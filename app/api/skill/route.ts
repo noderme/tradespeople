@@ -274,15 +274,38 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
       }
 
       case 'get_reviews': {
-        const limit = (data?.limit as number) || 5
-        const { data: reviews, error } = await supabase
+        const status  = data?.status as string | undefined   // 'sent' | 'opened' | 'clicked'
+        const period  = data?.period as string | undefined   // 'week' | 'month' | 'year'
+        const limit   = (data?.limit as number) || 50
+
+        let query = supabase
           .from('reviews')
           .select('id, customer_email, status, created_at, updated_at, quote_id')
           .eq('user_id', user_id)
           .order('created_at', { ascending: false })
           .limit(limit)
+
+        if (status) query = query.eq('status', status)
+
+        if (period) {
+          const from = new Date()
+          if (period === 'week')  from.setDate(from.getDate() - 7)
+          if (period === 'month') from.setMonth(from.getMonth() - 1)
+          if (period === 'year')  from.setFullYear(from.getFullYear() - 1)
+          query = query.gte('created_at', from.toISOString())
+        }
+
+        const { data: reviews, error } = await query
         if (error) throw error
-        return NextResponse.json({ success: true, action: 'get_reviews', result: reviews })
+
+        return NextResponse.json({
+          success: true,
+          action: 'get_reviews',
+          result: {
+            total: reviews.length,
+            reviews,
+          },
+        })
       }
 
       default:
