@@ -11,7 +11,7 @@ import type { LineItem, QuoteStatus } from '@/types/database'
  */
 
 interface SkillRequest {
-  action: 'check_user' | 'chat' | 'get_price_history' | 'create_quote' | 'send_quote' | 'get_quotes'
+  action: 'check_user' | 'chat' | 'get_price_history' | 'create_quote' | 'send_quote' | 'get_quotes' | 'get_reviews'
   user_id: string
   data?: Record<string, unknown>
 }
@@ -220,7 +220,13 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
         const currency = profile.currency ?? 'USD'
         const totalFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(quote.total))
-        const { data: { publicUrl: pdfUrl } } = supabase.storage.from('quotes').getPublicUrl(`quote-${quote.id}.pdf`)
+
+        const reviewUrl = profile.google_place_id
+          ? `https://search.google.com/local/writereview?placeid=${profile.google_place_id}`
+          : null
+        const reviewButtonHtml = reviewUrl
+          ? `<p style="margin-top:24px;"><a href="${reviewUrl}" style="background:#f97316;color:#000;font-weight:bold;padding:12px 24px;text-decoration:none;display:inline-block;font-family:sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;">⭐ Leave a Google Review</a></p>`
+          : ''
 
         // Send email via Resend
         if (!process.env.RESEND_API_KEY) {
@@ -231,7 +237,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         const resend = new Resend(process.env.RESEND_API_KEY)
         const from = process.env.RESEND_FROM_EMAIL ?? 'quotes@resend.dev'
 
-        const { error: sendError } = await resend.emails.send({
+        const { data: sendData, error: sendError } = await resend.emails.send({
           from,
           to: email,
           subject: `Quote ${quoteNum} from ${profile.business_name}`,
@@ -240,15 +246,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
             <p>${profile.business_name} has sent you a quote (${quoteNum}).</p>
             <p>Please find the quote attached as a PDF.</p>
             <p><strong>Total: ${totalFormatted}</strong></p>
-            <p>View your quote online: <a href="${pdfUrl}">${pdfUrl}</a></p>
+            ${reviewButtonHtml}
             <p>Thanks,<br/>${profile.business_name}</p>
           `,
-          attachments: [
-            {
-              filename: `${quoteNum}.pdf`,
-              content: buffer,
-            },
-          ],
+          attachments: [{ filename: `${quoteNum}.pdf`, content: buffer }],
         })
 
         if (sendError) {
@@ -256,14 +257,32 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           return NextResponse.json({ success: false, action: 'send_quote', error: 'Failed to send email' }, { status: 500 })
         }
 
-        // Update quote status to 'sent'
-        await supabase
-          .from('quotes')
-          .update({ status: 'sent', sent_at: new Date().toISOString() })
-          .eq('id', quote_id)
+        // Update quote status + create review record
+        await Promise.all([
+          supabase.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quote_id),
+          supabase.from('reviews').insert({
+            user_id,
+            quote_id,
+            customer_email: email,
+            resend_email_id: sendData?.id ?? null,
+            status: 'sent',
+          }),
+        ])
 
         console.log('send_quote: email sent successfully to', email)
         return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email}` } })
+      }
+
+      case 'get_reviews': {
+        const limit = (data?.limit as number) || 5
+        const { data: reviews, error } = await supabase
+          .from('reviews')
+          .select('id, customer_email, status, created_at, updated_at, quote_id')
+          .eq('user_id', user_id)
+          .order('created_at', { ascending: false })
+          .limit(limit)
+        if (error) throw error
+        return NextResponse.json({ success: true, action: 'get_reviews', result: reviews })
       }
 
       default:

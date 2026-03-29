@@ -1,4 +1,5 @@
 export type Plan = 'trial' | 'starter' | 'pro' | 'team' | 'canceled'
+export type ReviewStatus = 'sent' | 'opened' | 'clicked'
 export type QuoteStatus = 'draft' | 'pending' | 'sent' | 'viewed' | 'accepted' | 'declined' | 'cancelled'
 export type SessionState = 'collecting' | 'reviewing' | 'customer_info' | 'sending' | 'complete'
 export type TradeType = 'plumber' | 'electrician' | 'hvac' | 'roofer' | 'other'
@@ -31,6 +32,7 @@ export type Database = {
           currency: string
           business_phone: string | null
           business_email: string | null
+          google_place_id: string | null
         }
         Insert: {
           id?: string
@@ -49,6 +51,7 @@ export type Database = {
           currency?: string
           business_phone?: string | null
           business_email?: string | null
+          google_place_id?: string | null
         }
         Update: {
           id?: string
@@ -67,6 +70,7 @@ export type Database = {
           currency?: string
           business_phone?: string | null
           business_email?: string | null
+          google_place_id?: string | null
         }
         Relationships: []
       }
@@ -223,8 +227,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          id: string
+          user_id: string
+          quote_id: string
+          customer_email: string
+          resend_email_id: string | null
+          status: ReviewStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          quote_id: string
+          customer_email: string
+          resend_email_id?: string | null
+          status?: ReviewStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          quote_id?: string
+          customer_email?: string
+          resend_email_id?: string | null
+          status?: ReviewStatus
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
+
     Functions: Record<string, never>
     Enums: Record<string, never>
     CompositeTypes: Record<string, never>

@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { uploadLogoAction, saveTradeTypeAction } from './actions'
+import { uploadLogoAction, saveTradeTypeAction, saveGooglePlaceIdAction } from './actions'
 
 const TRADES = [
   { value: 'plumber', label: '🔧 Plumber' },
@@ -17,6 +17,7 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1)
   const [logoPreview, setLogoPreview] = useState<string | null>(null)
   const [selectedTrade, setSelectedTrade] = useState<string | null>(null)
+  const [placeId, setPlaceId] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -42,6 +43,19 @@ export default function OnboardingPage() {
     setError(null)
     try {
       await saveTradeTypeAction(selectedTrade)
+      setStep(3)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Save failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handlePlaceIdStep(skip = false) {
+    setLoading(true)
+    setError(null)
+    try {
+      await saveGooglePlaceIdAction(skip ? null : placeId.trim() || null)
       router.push('/dashboard')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Save failed')
@@ -57,7 +71,7 @@ export default function OnboardingPage() {
           TRADEQUOTE
         </span>
         <div className="flex gap-2">
-          {[1, 2].map(s => (
+          {[1, 2, 3].map(s => (
             <div
               key={s}
               className={`w-8 h-1 ${s <= step ? 'bg-orange-500' : 'bg-neutral-700'}`}
@@ -133,6 +147,61 @@ export default function OnboardingPage() {
                 Skip for now
               </button>
             </form>
+          )}
+
+          {/* Step 3: Google Place ID */}
+          {step === 3 && (
+            <div>
+              <div className="mb-10">
+                <div className="text-neutral-500 text-xs uppercase tracking-widest mb-2">Step 3 of 3</div>
+                <h1 className="font-display font-bold text-4xl uppercase tracking-tight mb-2">
+                  GET MORE<br />
+                  <span className="text-orange-500">REVIEWS</span>
+                </h1>
+                <p className="text-neutral-400">We&apos;ll add a Google review button to every quote email you send.</p>
+              </div>
+
+              <label className="block text-xs font-bold uppercase tracking-wider text-neutral-400 mb-2">
+                Google Place ID
+              </label>
+              <input
+                type="text"
+                value={placeId}
+                onChange={e => setPlaceId(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && placeId.trim()) handlePlaceIdStep() }}
+                placeholder="ChIJN1t_tDeuEmsRUsoyG83frY4"
+                className="w-full px-4 py-3 mb-3 bg-neutral-800 border border-neutral-700 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-orange-500"
+                style={{ fontSize: '16px' }}
+              />
+              <p className="text-neutral-500 text-xs mb-8">
+                Find your Place ID at{' '}
+                <a
+                  href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-orange-500 hover:text-orange-400 underline"
+                >
+                  Google Place ID Finder
+                </a>
+                {' '}— search your business name and copy the ID.
+              </p>
+
+              <button
+                onClick={() => handlePlaceIdStep()}
+                disabled={!placeId.trim() || loading}
+                className="w-full bg-orange-500 text-black font-bold uppercase tracking-wider py-4 text-lg hover:bg-orange-400 transition-colors disabled:opacity-50 mb-3"
+              >
+                {loading ? 'Saving...' : 'Save & Go to Dashboard →'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handlePlaceIdStep(true)}
+                disabled={loading}
+                className="w-full text-neutral-500 text-sm hover:text-neutral-300 uppercase tracking-wider py-2"
+              >
+                Skip for now
+              </button>
+            </div>
           )}
 
           {/* Step 2: Trade type */}

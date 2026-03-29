@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
-import { generateQuotePdf } from '@/lib/generatePdf'
+import { buildPdfBuffer } from '@/lib/generatePdf'
 
 export async function POST(
   request: NextRequest,
@@ -65,12 +65,15 @@ async function sendQuoteEmail(
 
   if (!quote || !profile) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  const buffer    = await generateQuotePdf(quote, profile)
-  const year      = new Date(quote.created_at).getFullYear()
-  const quoteNum  = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
-  const currency  = profile.currency ?? 'USD'
+  const buffer     = await buildPdfBuffer(quote, profile)
+  const year       = new Date(quote.created_at).getFullYear()
+  const quoteNum   = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
+  const currency   = profile.currency ?? 'USD'
   const totalFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(Number(quote.total))
-  const { data: { publicUrl: pdfUrl } } = service.storage.from('quotes').getPublicUrl(`quote-${quote.id}.pdf`)
+
+  const reviewUrl = profile.google_place_id
+    ? `https://search.google.com/local/writereview?placeid=${profile.google_place_id}`
+    : null
 
   if (!process.env.RESEND_API_KEY) {
     console.warn('RESEND_API_KEY not set — skipping email send')
@@ -80,7 +83,15 @@ async function sendQuoteEmail(
   const resend = new Resend(process.env.RESEND_API_KEY)
   const from = process.env.RESEND_FROM_EMAIL ?? 'quotes@resend.dev'
 
-  const { error: sendError } = await resend.emails.send({
+  const reviewButtonHtml = reviewUrl
+    ? `<p style="margin-top:24px;">
+        <a href="${reviewUrl}" style="background:#f97316;color:#000;font-weight:bold;padding:12px 24px;text-decoration:none;display:inline-block;font-family:sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;">
+          ⭐ Leave a Google Review
+        </a>
+       </p>`
+    : ''
+
+  const { data: sendData, error: sendError } = await resend.emails.send({
     from,
     to: email,
     subject: `Quote ${quoteNum} from ${profile.business_name}`,
@@ -89,15 +100,10 @@ async function sendQuoteEmail(
       <p>${profile.business_name} has sent you a quote (${quoteNum}).</p>
       <p>Please find the quote attached as a PDF.</p>
       <p><strong>Total: ${totalFormatted}</strong></p>
-      <p>View your quote online: <a href="${pdfUrl}">${pdfUrl}</a></p>
+      ${reviewButtonHtml}
       <p>Thanks,<br/>${profile.business_name}</p>
     `,
-    attachments: [
-      {
-        filename: `${quoteNum}.pdf`,
-        content: buffer,
-      },
-    ],
+    attachments: [{ filename: `${quoteNum}.pdf`, content: buffer }],
   })
 
   if (sendError) {
@@ -105,11 +111,17 @@ async function sendQuoteEmail(
     return NextResponse.json({ error: 'Failed to send email' }, { status: 500 })
   }
 
-  // Update quote status to 'sent'
-  await service
-    .from('quotes')
-    .update({ status: 'sent', sent_at: new Date().toISOString() })
-    .eq('id', quoteId)
+  // Update quote status + create review record
+  await Promise.all([
+    service.from('quotes').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', quoteId),
+    service.from('reviews').insert({
+      user_id: userId,
+      quote_id: quoteId,
+      customer_email: email,
+      resend_email_id: sendData?.id ?? null,
+      status: 'sent',
+    }),
+  ])
 
   return NextResponse.json({ ok: true })
 }

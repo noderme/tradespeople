@@ -27,6 +27,14 @@ export async function uploadLogoAction(formData: FormData): Promise<{ logo_url: 
   return { logo_url: publicUrl }
 }
 
+export async function saveGooglePlaceIdAction(google_place_id: string | null): Promise<void> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  await supabase.from('users').update({ google_place_id }).eq('id', user.id)
+}
+
 export async function saveTradeTypeAction(trade_type: string): Promise<void> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
