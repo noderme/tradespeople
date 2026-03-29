@@ -14,6 +14,6 @@ export const config = {
      * - api/webhooks/*             (WhatsApp + Paddle webhooks — must be
      *                               publicly accessible, no auth redirect)
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|api/skill|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|api/resend/webhook|api/skill|viewpdf|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
