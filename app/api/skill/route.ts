@@ -52,10 +52,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
     const supabase = createServiceClient()
 
     if (user_id && user_id.includes('@')) {
+      user_id = user_id.trim().toLowerCase()
       const { data: userRecord, error: userError } = await supabase
         .from('users')
         .select('id')
-        .eq('email', user_id.toLowerCase())
+        .eq('email', user_id)
         .single()
 
       if (userError && userError.code !== 'PGRST116') throw userError
@@ -270,7 +271,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         ])
 
         console.log('send_quote: email sent successfully to', email)
-        return NextResponse.json({ success: true, action: 'send_quote', result: { message: `Quote sent to ${email}` } })
+        const message = profile.google_place_id
+          ? `Email sent and review requested to ${email}`
+          : `Email sent to ${email}`
+        return NextResponse.json({ success: true, action: 'send_quote', result: { message } })
       }
 
       case 'get_reviews': {
