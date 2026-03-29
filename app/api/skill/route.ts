@@ -11,7 +11,7 @@ import type { LineItem, QuoteStatus } from '@/types/database'
  */
 
 interface SkillRequest {
-  action: 'chat' | 'get_price_history' | 'create_quote' | 'send_quote' | 'get_quotes'
+  action: 'check_user' | 'chat' | 'get_price_history' | 'create_quote' | 'send_quote' | 'get_quotes'
   user_id: string
   data?: Record<string, unknown>
 }
@@ -78,6 +78,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
     }
 
     switch (action) {
+      case 'check_user': {
+        return NextResponse.json({ success: true, action: 'check_user', result: { status: 'ok' } })
+      }
+
       case 'chat': {
         if (!data || !data.message || !data.threadId) {
           return NextResponse.json({ success: false, action: 'chat', error: 'Missing message or threadId' }, { status: 400 })

@@ -35,25 +35,23 @@ async function main() {
   console.log(` ${results.length} posts`)
 
   const lines = [
-    `# r/popular — Top Posts`,
+    `r/popular — Top Posts`,
+    `Generated: ${now.toUTCString()}`,
+    `Filter: 100+ upvotes, last 24 hours`,
+    `Total: ${results.length} posts`,
     ``,
-    `**Generated:** ${now.toUTCString()}  `,
-    `**Filter:** 100+ upvotes, last 24 hours  `,
-    `**Total:** ${results.length} posts`,
-    ``,
-    `---`,
+    `========================================`,
     ``,
   ]
 
   for (const post of results) {
-    lines.push(`### ${post.title}`)
+    lines.push(post.title)
+    lines.push(`Subreddit: r/${post.subreddit}`)
+    lines.push(`Upvotes: ${post.upvotes.toLocaleString()}`)
+    lines.push(`Posted: ${post.created.toUTCString()}`)
+    lines.push(`Link: ${post.url}`)
     lines.push(``)
-    lines.push(`- **Subreddit:** r/${post.subreddit}`)
-    lines.push(`- **Upvotes:** ${post.upvotes.toLocaleString()}`)
-    lines.push(`- **Posted:** ${post.created.toUTCString()}`)
-    lines.push(`- **Link:** ${post.url}`)
-    lines.push(``)
-    lines.push(`---`)
+    lines.push(`----------------------------------------`)
     lines.push(``)
   }
 

@@ -44,26 +44,24 @@ async function main() {
   results.sort((a, b) => b.upvotes - a.upvotes)
 
   const lines = [
-    `# Trade Subreddits — Top Posts`,
+    `Trade Subreddits — Top Posts`,
+    `Generated: ${now.toUTCString()}`,
+    `Subreddits: ${SUBREDDITS.map(s => `r/${s}`).join(', ')}`,
+    `Filter: 10+ upvotes, last 24 hours`,
+    `Total: ${results.length} posts`,
     ``,
-    `**Generated:** ${now.toUTCString()}  `,
-    `**Subreddits:** ${SUBREDDITS.map(s => `r/${s}`).join(', ')}  `,
-    `**Filter:** 10+ upvotes, last 24 hours  `,
-    `**Total:** ${results.length} posts`,
-    ``,
-    `---`,
+    `========================================`,
     ``,
   ]
 
   for (const post of results) {
-    lines.push(`### ${post.title}`)
+    lines.push(post.title)
+    lines.push(`Subreddit: r/${post.subreddit}`)
+    lines.push(`Upvotes: ${post.upvotes.toLocaleString()}`)
+    lines.push(`Posted: ${post.created.toUTCString()}`)
+    lines.push(`Link: ${post.url}`)
     lines.push(``)
-    lines.push(`- **Subreddit:** r/${post.subreddit}`)
-    lines.push(`- **Upvotes:** ${post.upvotes.toLocaleString()}`)
-    lines.push(`- **Posted:** ${post.created.toUTCString()}`)
-    lines.push(`- **Link:** ${post.url}`)
-    lines.push(``)
-    lines.push(`---`)
+    lines.push(`----------------------------------------`)
     lines.push(``)
   }
 
