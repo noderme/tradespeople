@@ -7,15 +7,25 @@ export async function GET(
 ) {
   const supabase = createServiceClient()
 
+  // Verify the quote exists and belongs to someone
   const { data: quote } = await supabase
     .from('quotes')
-    .select('pdf_url')
+    .select('id')
     .eq('id', params.id)
     .single()
 
-  if (!quote?.pdf_url) {
+  if (!quote) {
     return NextResponse.json({ error: 'PDF not found' }, { status: 404 })
   }
 
-  return NextResponse.redirect(quote.pdf_url)
+  // Generate a time-limited signed URL (valid 30 days)
+  const { data, error } = await supabase.storage
+    .from('quotes')
+    .createSignedUrl(`quote-${params.id}.pdf`, 60 * 60 * 24 * 30)
+
+  if (error || !data?.signedUrl) {
+    return NextResponse.json({ error: 'PDF not available' }, { status: 404 })
+  }
+
+  return NextResponse.redirect(data.signedUrl)
 }
