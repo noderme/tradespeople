@@ -31,7 +31,7 @@ export async function updateSession(request: NextRequest) {
   // 0. BYPASS FOR SKILL API (GPT Connection)
   // If this is the skill API, we skip the Supabase session check
   // because the API route itself validates the SKILL_API_KEY.
-  if (pathname.startsWith('/api/skill')) {
+  if (pathname.startsWith('/api/skill') || pathname.startsWith('/api/resend/webhook')) {
     return supabaseResponse
   }
 
