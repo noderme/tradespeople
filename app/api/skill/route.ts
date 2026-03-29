@@ -285,7 +285,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           .order('created_at', { ascending: false })
           .limit(limit)
 
-        if (status) query = query.eq('status', status)
+        if (status) query = query.eq('status', status as import('@/types/database').ReviewStatus)
 
         if (period) {
           const from = new Date()
