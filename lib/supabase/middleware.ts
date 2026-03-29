@@ -3,6 +3,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 import type { Database } from '@/types/database'
 
 export async function updateSession(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Bypass auth entirely for public API routes — no Supabase session needed
+  if (pathname.startsWith('/api/skill') || pathname.startsWith('/api/resend/webhook') || pathname.startsWith('/api/webhooks')) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient<Database>(
@@ -25,15 +32,6 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-
-  const { pathname } = request.nextUrl
-
-  // 0. BYPASS FOR SKILL API (GPT Connection)
-  // If this is the skill API, we skip the Supabase session check
-  // because the API route itself validates the SKILL_API_KEY.
-  if (pathname.startsWith('/api/skill') || pathname.startsWith('/api/resend/webhook')) {
-    return supabaseResponse
-  }
 
   // Redirect unauthenticated users away from protected routes
   const protectedPrefixes = ['/dashboard', '/settings', '/billing', '/onboarding', '/quotes', '/chat']
