@@ -45,6 +45,7 @@ export async function GET() {
     currency:               'USD',
     business_phone:         '+44 7911 123456',
     business_email:         'mike@mikesplumbing.com',
+    google_place_id:        null,
   }
 
   const buffer = await buildPdfBuffer(quote, user)
