@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { handleConversation } from '@/lib/conversation'
-import { generateQuotePdf } from '@/lib/generatePdf'
+import { buildPdfBuffer } from '@/lib/generatePdf'
 import { Resend } from 'resend'
 import type { LineItem, QuoteStatus } from '@/types/database'
 
@@ -173,7 +173,18 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
 
         if (quoteError) throw quoteError
 
-        return NextResponse.json({ success: true, action: 'create_quote', result: { quote_id: quote.id, total, message: `Quote created for ${customer_name}` } })
+        // Generate PDF and upload to storage
+        const { data: fullProfile } = await supabase.from('users').select('*').eq('id', user_id).single()
+        if (fullProfile) {
+          const pdfBuffer = await buildPdfBuffer(quote, fullProfile)
+          const filename = `quote-${quote.id}.pdf`
+          await supabase.storage.from('quotes').upload(filename, pdfBuffer, { contentType: 'application/pdf', upsert: true })
+          const { data: { publicUrl } } = supabase.storage.from('quotes').getPublicUrl(filename)
+          await supabase.from('quotes').update({ pdf_url: publicUrl }).eq('id', quote.id)
+        }
+
+        const siteUrl = process.env.NEXT_PUBLIC_APP_URL ?? ''
+        return NextResponse.json({ success: true, action: 'create_quote', result: { quote_id: quote.id, total, pdf_url: `${siteUrl}/viewpdf/${quote.id}`, message: `Quote created for ${customer_name}` } })
       }
 
       case 'send_quote': {
@@ -201,8 +212,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
           return NextResponse.json({ success: false, action: 'send_quote', error: 'User profile not found' }, { status: 404 })
         }
 
-        // Build PDF
-        const buffer = await generateQuotePdf(quote, profile)
+        // Build and upload PDF
+        const buffer = await buildPdfBuffer(quote, profile)
+        const pdfFilename = `quote-${quote.id}.pdf`
+        await supabase.storage.from('quotes').upload(pdfFilename, buffer, { contentType: 'application/pdf', upsert: true })
         const year = new Date(quote.created_at).getFullYear()
         const quoteNum = `Q-${year}-${quote.id.slice(-4).toUpperCase()}`
         const currency = profile.currency ?? 'USD'
