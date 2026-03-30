@@ -302,12 +302,23 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         const { data: reviews, error } = await query
         if (error) throw error
 
+        const statusLabel: Record<string, string> = {
+          sent: 'Email sent',
+          opened: 'Viewed',
+          clicked: 'Review given',
+        }
+
+        const mapped = reviews.map(r => ({
+          ...r,
+          status: statusLabel[r.status] ?? r.status,
+        }))
+
         return NextResponse.json({
           success: true,
           action: 'get_reviews',
           result: {
-            total: reviews.length,
-            reviews,
+            total: mapped.length,
+            reviews: mapped,
           },
         })
       }
