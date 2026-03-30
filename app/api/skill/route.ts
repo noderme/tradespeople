@@ -65,7 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         user_id = userRecord.id
       } else {
         return NextResponse.json(
-          { success: false, action: 'user_lookup', error: 'Account not found. Please register or provide a valid email.' },
+          { success: false, action: 'user_lookup', error: 'Account not found. Sign up here: https://www.quotejob.app/signup' },
           { status: 404 }
         )
       }
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         // 2. Enforce plan limits
         if (userProfile.plan === 'trial' && quoteCount >= 10) {
           return NextResponse.json(
-            { success: false, action: 'create_quote', error: 'Quote limit reached. Please upgrade your plan at quotejob.app/billing to create more quotes.' },
+            { success: false, action: 'create_quote', error: 'Quote limit reached. Upgrade your plan here: https://www.quotejob.app/billing' },
             { status: 403 }
           )
         }
