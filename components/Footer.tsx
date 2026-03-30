@@ -7,7 +7,8 @@ export function Footer() {
         <span className="text-neutral-600 text-xs uppercase tracking-widest font-bold">
           © 2026 TradeQuote. All rights reserved.
         </span>
-        <div className="flex gap-6">
+        <div className="flex flex-wrap gap-6">
+          <Link href="/blog"    className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-widest transition-colors">Blog</Link>
           <Link href="/terms"   className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-widest transition-colors">Terms</Link>
           <Link href="/privacy" className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-widest transition-colors">Privacy</Link>
           <Link href="/refund"  className="text-neutral-500 hover:text-neutral-300 text-xs uppercase tracking-widest transition-colors">Refunds</Link>

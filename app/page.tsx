@@ -1,7 +1,20 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Footer } from '@/components/Footer'
+
+export const metadata: Metadata = {
+  title: 'TradeQuote — AI Quote Generator for Plumbers, Electricians & HVAC Techs',
+  description: 'Create and send professional PDF job quotes in 60 seconds. AI-powered quoting tool built for plumbers, electricians, HVAC techs, roofers, and gas engineers. Works in ChatGPT and Claude.',
+  alternates: { canonical: 'https://www.quotejob.app/' },
+  openGraph: {
+    title: 'TradeQuote — AI Quote Generator for Tradespeople',
+    description: 'Quote on-site. Get paid faster. Send professional PDF quotes in 60 seconds — built for plumbers, electricians, HVAC techs, roofers, and gas engineers.',
+    url: 'https://www.quotejob.app/',
+    type: 'website',
+  },
+}
 
 export default async function HomePage() {
   const supabase = createClient()
@@ -28,17 +41,18 @@ export default async function HomePage() {
       <section className="px-6 py-24 text-center">
         <div className="max-w-3xl mx-auto">
           <div className="inline-block bg-orange-500 text-black text-xs font-bold uppercase tracking-widest px-3 py-1 mb-8">
-            Built for the job site
+            AI quote generator for tradespeople
           </div>
 
           <h1 className="font-display font-bold text-5xl md:text-7xl uppercase tracking-tight leading-none mb-6">
-            Send professional quotes<br />
-            <span className="text-orange-500">in 60 seconds</span>
+            Quote on-site.<br />
+            <span className="text-orange-500">Get paid faster.</span>
           </h1>
 
           <p className="text-neutral-400 text-xl max-w-2xl mx-auto mb-10 leading-relaxed">
-            Describe your job by text. Get a branded PDF quote instantly.
-            Built for plumbers, electricians and HVAC techs.
+            Describe the job, get a professional PDF estimate in 60 seconds.
+            Send it to your customer before you leave the driveway.
+            Built for plumbers, electricians, HVAC techs, roofers, and gas engineers.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -62,14 +76,18 @@ export default async function HomePage() {
 
       {/* ── Stats bar ───────────────────────────────────────────────── */}
       <div className="border-y border-neutral-800 px-6 py-8">
-        <div className="max-w-4xl mx-auto grid grid-cols-3 gap-8 text-center">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div>
             <div className="font-display font-bold text-3xl text-orange-500 mb-1">60s</div>
             <div className="text-neutral-500 text-sm uppercase tracking-wider">Quote time</div>
           </div>
           <div>
             <div className="font-display font-bold text-3xl text-orange-500 mb-1">PDF</div>
-            <div className="text-neutral-500 text-sm uppercase tracking-wider">Branded output</div>
+            <div className="text-neutral-500 text-sm uppercase tracking-wider">Branded estimate</div>
+          </div>
+          <div>
+            <div className="font-display font-bold text-3xl text-orange-500 mb-1">AI</div>
+            <div className="text-neutral-500 text-sm uppercase tracking-wider">ChatGPT + Claude</div>
           </div>
           <div>
             <div className="font-display font-bold text-3xl text-orange-500 mb-1">0</div>
@@ -81,25 +99,28 @@ export default async function HomePage() {
       {/* ── How it works ────────────────────────────────────────────── */}
       <section className="px-6 py-24">
         <div className="max-w-4xl mx-auto">
-          <h2 className="font-display font-bold text-3xl uppercase tracking-tight text-center mb-16">
+          <h2 className="font-display font-bold text-3xl uppercase tracking-tight text-center mb-4">
             How it works
           </h2>
+          <p className="text-neutral-500 text-center text-sm mb-16 uppercase tracking-widest">
+            From job description to customer quote in under a minute
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 step: '01',
-                title: 'Describe your job',
-                body: 'Type what you did — "replaced kitchen tap, 2 hours labour, new fittings". No forms, no templates.',
+                title: 'Describe the job',
+                body: 'Tell the AI what you did — "replaced boiler, 3 hours labour, parts included". Works in ChatGPT, Claude, or the web app. No forms.',
               },
               {
                 step: '02',
-                title: 'AI builds the quote',
-                body: 'The AI extracts line items, calculates the total, and structures a professional quote in seconds.',
+                title: 'AI builds your estimate',
+                body: 'Line items, labour, materials, tax — all structured into a professional trade quote. Your business name and logo on every PDF.',
               },
               {
                 step: '03',
-                title: 'Send PDF to customer',
-                body: 'Email a branded PDF directly from the app. Your customer sees your business name, logo, and total.',
+                title: 'Send. Get approved. Get paid.',
+                body: 'Email the quote to your customer on the spot. They open it, approve it, and you get paid — no chasing, no paperwork.',
               },
             ].map(({ step, title, body }) => (
               <div key={step} className="bg-neutral-900 border border-neutral-800 p-8">
@@ -107,6 +128,53 @@ export default async function HomePage() {
                 <h3 className="font-display font-bold text-xl uppercase tracking-tight mb-3">{title}</h3>
                 <p className="text-neutral-400 text-sm leading-relaxed">{body}</p>
               </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Works where you work ────────────────────────────────────── */}
+      <section className="px-6 py-20 border-t border-neutral-800">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="font-display font-bold text-3xl uppercase tracking-tight mb-4">
+            Works where you work
+          </h2>
+          <p className="text-neutral-500 text-sm mb-12 uppercase tracking-widest">
+            Use it in the AI tools you already have open
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                title: 'ChatGPT',
+                body: 'Install the TradeQuote GPT from the ChatGPT store. Create quotes, send estimates, and track jobs — all without leaving ChatGPT.',
+              },
+              {
+                title: 'Claude',
+                body: 'Works directly in Claude. Describe the job in plain English and get a branded PDF quote sent to your customer.',
+              },
+              {
+                title: 'Web App',
+                body: 'Full dashboard on any device. Manage your quotes, review customer history, and track sent estimates.',
+              },
+            ].map(({ title, body }) => (
+              <div key={title} className="bg-neutral-900 border border-neutral-800 p-6 text-left">
+                <div className="text-orange-500 font-display font-bold text-lg uppercase tracking-tight mb-2">{title}</div>
+                <p className="text-neutral-400 text-sm leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trades ──────────────────────────────────────────────────── */}
+      <section className="px-6 py-16 border-t border-neutral-800">
+        <div className="max-w-4xl mx-auto text-center">
+          <p className="text-neutral-600 text-xs uppercase tracking-widest mb-6">Built for every trade</p>
+          <div className="flex flex-wrap justify-center gap-3">
+            {['Plumbers', 'Electricians', 'HVAC Techs', 'Gas Engineers', 'Roofers', 'Builders', 'Carpenters', 'Tilers', 'Painters', 'Landscapers'].map(trade => (
+              <span key={trade} className="border border-neutral-800 text-neutral-500 text-xs font-bold uppercase tracking-wider px-3 py-1.5">
+                {trade}
+              </span>
             ))}
           </div>
         </div>
@@ -127,13 +195,13 @@ export default async function HomePage() {
               {
                 label: 'Starter',
                 price: 29,
-                features: ['10 quotes/month', 'PDF generation', 'Email delivery', 'WhatsApp bot'],
+                features: ['10 quotes/month', 'Branded PDF estimates', 'Email delivery', 'ChatGPT & Claude', 'WhatsApp bot'],
                 highlight: false,
               },
               {
                 label: 'Pro',
                 price: 79,
-                features: ['Unlimited quotes', 'PDF generation', 'Email delivery', 'WhatsApp bot', 'Custom branding', 'Priority support'],
+                features: ['Unlimited quotes', 'Branded PDF estimates', 'Email delivery', 'ChatGPT & Claude', 'WhatsApp bot', 'Custom branding', 'Google review requests', 'Priority support'],
                 highlight: true,
               },
               {
