@@ -142,19 +142,15 @@ export default async function HomePage() {
           <p className="text-neutral-500 text-sm mb-12 uppercase tracking-widest">
             Use it in the AI tools you already have open
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
             {[
               {
                 title: 'ChatGPT',
-                body: 'Install the TradeQuote GPT from the ChatGPT store. Create quotes, send estimates, and track jobs — all without leaving ChatGPT.',
-              },
-              {
-                title: 'ChatGPT Store',
-                body: "Search 'Invoice & Quote Maker for Trades' on the ChatGPT store. Create quotes, send estimates and track jobs without leaving ChatGPT.",
+                body: "Search 'Invoice & Quote Maker for Trades' on the ChatGPT store. Create quotes, send estimates, track jobs and get automatic Google review requests sent to your customers — all without leaving ChatGPT.",
               },
               {
                 title: 'Web App',
-                body: 'Full dashboard on any device. Manage your quotes, review customer history, and track sent estimates.',
+                body: 'Full dashboard on any device. Manage your quotes, review customer history, and track sent estimates. Automatic Google review requests sent to customers after every job — silent, no effort needed.',
               },
             ].map(({ title, body }) => (
               <div key={title} className="bg-neutral-900 border border-neutral-800 p-6 text-left">
