@@ -9,6 +9,53 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'send-a-quote-from-your-phone-on-site',
+    title: 'How to Send a Professional Quote From Your Phone While Still On-Site',
+    metaDescription: 'Stop going back to the office to write quotes. This is how tradespeople send branded PDF quotes to customers in under 60 seconds — directly from their phone.',
+    date: '2026-03-31',
+    readTime: '3 min',
+    content: `
+      <p class="lead">The best time to send a quote is before you leave the customer's driveway. The longer you wait, the lower your chance of winning the job. Here's exactly how to do it from your phone in under 60 seconds.</p>
+
+      <h2>Why On-Site Quoting Wins More Work</h2>
+      <p>When a customer gets three quotes, they often go with whoever responds first — not who's cheapest. Sending your quote while you're still parked outside does two things:</p>
+      <ul>
+        <li>It shows you're organised and professional</li>
+        <li>It lands in the customer's inbox while you're still fresh in their mind</li>
+      </ul>
+      <p>Waiting until you get home — or worse, the next morning — means competing against other tradespeople who moved faster than you.</p>
+
+      <h2>What TradeQuote Does</h2>
+      <p>TradeQuote takes a plain English job description and turns it into a professional, branded PDF quote in under 60 seconds.</p>
+      <p>You describe what you did — labour, materials, call-out fee — and the app structures it into a clean quote with your business name and logo, calculates the total, and emails it directly to your customer. No templates, no spreadsheets, no going back to the office.</p>
+
+      <h2>Step-by-Step: Send a Quote in 60 Seconds</h2>
+      <ol>
+        <li><strong>Open TradeQuote</strong> — in ChatGPT, Claude, or the web app on your phone</li>
+        <li><strong>Describe the job</strong> — "replaced kitchen tap, 1.5 hours labour at £55/hr, new tap fitting £18, call-out £35"</li>
+        <li><strong>Review the quote</strong> — the AI builds the line items and calculates the total</li>
+        <li><strong>Enter the customer's email</strong> — and hit send</li>
+      </ol>
+      <p>The customer receives a branded PDF quote while you're still in their street.</p>
+
+      <h2>Works in the Tools You Already Use</h2>
+      <p>TradeQuote is available as a GPT in ChatGPT, a skill in Claude, and a standalone web app. If you're already using ChatGPT on your phone, you can quote jobs without opening anything new.</p>
+
+      <h2>What the Customer Receives</h2>
+      <p>A professional PDF with:</p>
+      <ul>
+        <li>Your business name and branding</li>
+        <li>Itemised line items (labour, parts, call-out)</li>
+        <li>Subtotal, VAT, and total</li>
+        <li>Your contact details</li>
+      </ul>
+      <p>It looks like it came from an established business — because it did.</p>
+
+      <h2>Start Today</h2>
+      <p>TradeQuote has a 7-day free trial with no credit card required. Sign up, add your business details, and send your first quote in under two minutes.</p>
+    `,
+  },
+  {
     slug: 'how-to-write-a-job-estimate-that-wins-work',
     title: 'How to Write a Job Estimate That Wins More Work',
     metaDescription: 'A well-written job estimate does more than list prices — it builds trust and closes jobs. Here\'s exactly how tradespeople should structure estimates to win more work.',
@@ -66,8 +113,8 @@ export const BLOG_POSTS: BlogPost[] = [
 
       <h2>The Fastest Way to Write and Send an Estimate</h2>
       <p>Writing a professional estimate used to mean going back to the office, opening a spreadsheet, filling in each line item, exporting a PDF, and attaching it to an email. Most tradespeople were sending estimates the next morning at best.</p>
-      <p>With TradeQuote, you describe the job in plain English — "replaced kitchen radiator, 2 hours labour, new radiator £85, valves £22, call-out £40" — and get a fully itemised, branded PDF estimate sent to your customer's email in under 60 seconds. Works directly in ChatGPT, Claude, or the web app. No templates, no spreadsheets.</p>
-      <p>The faster your estimate lands in the customer's inbox, the more jobs you win. It's that simple.</p>
+      <p>With TradeQuote, you describe the job in plain English — "replaced kitchen radiator, 2 hours labour, new radiator £85, valves £22, call-out £40" — and get a fully itemised, branded PDF quote sent to your customer's email in under 60 seconds. Works directly in ChatGPT, Claude, or the web app. No templates, no spreadsheets.</p>
+      <p>The faster your quote lands in the customer's inbox, the more jobs you win. It's that simple.</p>
     `,
   },
   {
