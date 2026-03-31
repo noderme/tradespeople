@@ -57,7 +57,7 @@ export default function BlogPostPage({ params }: Props) {
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon-192.png` },
     },
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${post.slug}` },
-    inLanguage: 'en-GB',
+    inLanguage: 'en-US',
   }
 
   const otherPosts = BLOG_POSTS.filter(p => p.slug !== post.slug).slice(0, 3)
@@ -92,7 +92,7 @@ export default function BlogPostPage({ params }: Props) {
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-4">
             <span className="text-xs text-neutral-500 uppercase tracking-widest">
-              {new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {new Date(post.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
             </span>
             <span className="text-xs text-neutral-600">·</span>
             <span className="text-xs text-neutral-500 uppercase tracking-widest">{post.readTime} read</span>

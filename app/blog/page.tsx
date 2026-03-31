@@ -44,7 +44,7 @@ export default function BlogPage() {
               <article className="bg-neutral-900 border border-neutral-800 p-6 hover:border-orange-500/50 transition-colors">
                 <div className="flex items-center gap-4 mb-3">
                   <span className="text-xs text-neutral-500 uppercase tracking-widest">
-                    {new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    {new Date(post.date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                   <span className="text-xs text-neutral-600">·</span>
                   <span className="text-xs text-neutral-500 uppercase tracking-widest">{post.readTime} read</span>

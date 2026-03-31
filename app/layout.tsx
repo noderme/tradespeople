@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   creator: 'TradeQuote',
   openGraph: {
     type: 'website',
-    locale: 'en_GB',
+    locale: 'en_US',
     url: SITE_URL,
     siteName: 'TradeQuote',
     title: 'TradeQuote — AI Quote Generator for Tradespeople',
@@ -96,7 +96,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               offers: { '@type': 'Offer', price: '29', priceCurrency: 'USD', availability: 'https://schema.org/InStock' },
               featureList: ['AI quote generation', 'Branded PDF output', 'Email delivery', 'ChatGPT integration', 'Claude integration', 'WhatsApp bot', 'Google review requests'],
               author: { '@type': 'Organization', name: 'TradeQuote', url: SITE_URL },
-              inLanguage: 'en-GB',
+              inLanguage: 'en-US',
               audience: { '@type': 'BusinessAudience', audienceType: 'Plumbers, Electricians, HVAC Technicians, Roofers, Gas Engineers, Builders' },
             }),
           }}

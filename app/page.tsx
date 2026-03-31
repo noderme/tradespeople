@@ -149,8 +149,8 @@ export default async function HomePage() {
                 body: 'Install the TradeQuote GPT from the ChatGPT store. Create quotes, send estimates, and track jobs — all without leaving ChatGPT.',
               },
               {
-                title: 'Claude',
-                body: 'Works directly in Claude. Describe the job in plain English and get a branded PDF quote sent to your customer.',
+                title: 'ChatGPT Store',
+                body: "Search 'Invoice & Quote Maker for Trades' on the ChatGPT store. Create quotes, send estimates and track jobs without leaving ChatGPT.",
               },
               {
                 title: 'Web App',
@@ -195,13 +195,13 @@ export default async function HomePage() {
               {
                 label: 'Starter',
                 price: 29,
-                features: ['10 quotes/month', 'Branded PDF estimates', 'Email delivery', 'ChatGPT & Claude', 'WhatsApp bot'],
+                features: ['10 quotes/month', 'Branded PDF estimates', 'Email delivery', 'ChatGPT & Claude', 'ChatGPT Store'],
                 highlight: false,
               },
               {
                 label: 'Pro',
                 price: 79,
-                features: ['Unlimited quotes', 'Branded PDF estimates', 'Email delivery', 'ChatGPT & Claude', 'WhatsApp bot', 'Custom branding', 'Google review requests', 'Priority support'],
+                features: ['Unlimited quotes', 'Branded PDF estimates', 'Email delivery', 'ChatGPT & Claude', 'ChatGPT Store', 'Custom branding', 'Google review requests', 'Priority support'],
                 highlight: true,
               },
               {

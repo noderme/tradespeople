@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \":*)",
+      "Bash(ls /Users/madmax/tradequote/.env*)",
+      "Bash(node scrape.js)",
+      "Bash(node trade-scraper.js)",
+      "Bash(node karma-scraper.js)",
+      "Bash(ls -la /Users/madmax/tradequote/.env*)",
+      "Bash(grep -r \"create_quote\\\\|send_quote\\\\|skill\" /Users/madmax --include=*.ts --include=*.js -l)"
+    ],
+    "additionalDirectories": [
+      "/Users/madmax",
+      "/Users/madmax/tradequote/app/viewpdf",
+      "/Users/madmax/tradequote"
+    ]
+  }
+}
