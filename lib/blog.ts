@@ -9,6 +9,68 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'how-to-write-a-job-estimate-that-wins-work',
+    title: 'How to Write a Job Estimate That Wins More Work',
+    metaDescription: 'A well-written job estimate does more than list prices — it builds trust and closes jobs. Here\'s exactly how tradespeople should structure estimates to win more work.',
+    date: '2026-03-31',
+    readTime: '5 min',
+    content: `
+      <p class="lead">Most tradespeople think a job estimate is just a number. It's not. A well-written estimate is a sales document — and the difference between one that wins work and one that gets ignored often comes down to a few small things.</p>
+
+      <h2>What Is a Job Estimate?</h2>
+      <p>A job estimate is an approximation of the cost to complete a piece of work. Unlike a fixed quote, an estimate acknowledges that the final price may vary if the scope changes. It's commonly used when:</p>
+      <ul>
+        <li>You haven't fully assessed the job yet</li>
+        <li>Access or hidden conditions could affect labour time</li>
+        <li>Material prices are subject to availability</li>
+      </ul>
+      <p>Always make it explicit that your document is an estimate, not a fixed price — this protects you legally and sets the right expectations.</p>
+
+      <h2>The 7 Things Every Job Estimate Must Include</h2>
+
+      <h3>1. Your Business Details</h3>
+      <p>Name, trading name, phone, email, and any trade registrations (Gas Safe, NICEIC, NAPIT, etc.). This isn't just professional — it's what customers check before they decide to trust you.</p>
+
+      <h3>2. The Customer's Details</h3>
+      <p>Full name, address, and the site address if different. This avoids any confusion about what the estimate covers and for whom.</p>
+
+      <h3>3. A Clear Description of the Work</h3>
+      <p>Don't just write "boiler replacement" — write "supply and install Worcester Bosch Greenstar 30i combi boiler, including flue kit, system flush, and commissioning." The more specific you are, the fewer disputes you'll have.</p>
+
+      <h3>4. Itemised Costs</h3>
+      <p>Break out labour and materials separately. Customers don't need to know your exact margins, but they do want to see where their money is going. Itemised estimates win more often than lump-sum ones because they look transparent.</p>
+
+      <h3>5. VAT (if applicable)</h3>
+      <p>State clearly whether your prices include or exclude VAT. Showing a clean subtotal and VAT line eliminates a major source of post-job disputes.</p>
+
+      <h3>6. What's Not Included</h3>
+      <p>This is the part most tradespeople skip — and it's the most important. If your estimate doesn't cover plastering after the job, say so. If skip hire isn't included, say so. Exclusions protect you when the customer expects more than you priced for.</p>
+
+      <h3>7. Validity Period and Payment Terms</h3>
+      <p>Material prices change. Labour demand changes. Put "this estimate is valid for 30 days" on every document. Also state your payment terms upfront — "50% deposit on acceptance, balance on completion" — so there are no surprises.</p>
+
+      <h2>How to Make Your Estimate Stand Out</h2>
+
+      <h3>Send It the Same Day</h3>
+      <p>Speed is trust. A customer who gets three estimates will often go with whoever responds first — especially if all prices are similar. Aim to send your estimate the same day as the site visit, ideally within the hour.</p>
+
+      <h3>Use a Branded PDF, Not a Text Message</h3>
+      <p>A PDF with your logo, business name, and a clear layout signals professionalism before the customer even reads a word. A text message or a number scrawled on paper does the opposite.</p>
+
+      <h3>Include a Short Personal Note</h3>
+      <p>Two sentences at the top — "Thanks for showing me around today. I've outlined everything we discussed below and I'm happy to talk through any questions." — makes you sound like a person, not a vending machine.</p>
+
+      <h2>Estimate vs Quote: When to Use Each</h2>
+      <p>Use a <strong>fixed quote</strong> when you're confident about the full scope — new installations, like-for-like replacements, or well-defined refurbishment work. Use an <strong>estimate</strong> when you're less certain — investigation work, renovation jobs with hidden conditions, or reactive repairs where the full extent isn't clear until you open things up.</p>
+      <p>If you use an estimate, always give a range ("£600–£850 depending on access") rather than a single number. A single number gets treated as a fixed price by customers, even when you've said "estimate" at the top.</p>
+
+      <h2>The Fastest Way to Write and Send an Estimate</h2>
+      <p>Writing a professional estimate used to mean going back to the office, opening a spreadsheet, filling in each line item, exporting a PDF, and attaching it to an email. Most tradespeople were sending estimates the next morning at best.</p>
+      <p>With TradeQuote, you describe the job in plain English — "replaced kitchen radiator, 2 hours labour, new radiator £85, valves £22, call-out £40" — and get a fully itemised, branded PDF estimate sent to your customer's email in under 60 seconds. Works directly in ChatGPT, Claude, or the web app. No templates, no spreadsheets.</p>
+      <p>The faster your estimate lands in the customer's inbox, the more jobs you win. It's that simple.</p>
+    `,
+  },
+  {
     slug: 'how-to-quote-a-plumbing-job',
     title: 'How to Quote a Plumbing Job: A Complete Guide for Plumbers',
     metaDescription: 'Learn how to quote a plumbing job accurately and professionally. Covers labour rates, materials, call-out fees, and how to send a quote to a customer fast.',
