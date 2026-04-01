@@ -71,6 +71,20 @@ export default async function HomePage() {
           </div>
 
           <p className="text-neutral-600 text-sm mt-6">7-day free trial. No credit card required.</p>
+
+          <div className="flex flex-wrap justify-center gap-3 mt-10">
+            {[
+              '⚡ Quote in 60 seconds',
+              '📄 Branded PDF',
+              '⭐ Auto Google reviews',
+              '💬 Works in ChatGPT',
+              '0 paperwork',
+            ].map(f => (
+              <span key={f} className="bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold uppercase tracking-wider px-4 py-2">
+                {f}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
