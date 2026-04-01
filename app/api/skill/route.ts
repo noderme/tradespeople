@@ -361,17 +361,31 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
         const { data: sendData, error: sendError } = await resend.emails.send({
           from,
           to: email,
-          subject: `How did we do? — ${profile.business_name}`,
+          subject: `A quick favour from ${profile.business_name}`,
           html: `
-            <p>${greeting}</p>
-            <p>Thank you for choosing <strong>${profile.business_name}</strong>. We hope everything went smoothly.</p>
-            <p>If you have a moment, we'd really appreciate a quick Google review — it helps us a lot.</p>
-            <p style="margin-top:24px;">
-              <a href="${reviewUrl}" style="background:#f97316;color:#000;font-weight:bold;padding:12px 24px;text-decoration:none;display:inline-block;font-family:sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;">
-                ⭐ Leave a Google Review
-              </a>
-            </p>
-            <p style="margin-top:24px;">Thanks,<br/>${profile.business_name}</p>
+            <div style="font-family:sans-serif;max-width:480px;margin:0 auto;color:#1a1a1a;">
+              <p style="font-size:16px;">${greeting}</p>
+              <p style="font-size:15px;line-height:1.6;">
+                Thank you for choosing <strong>${profile.business_name}</strong> — we really appreciate your business.
+              </p>
+              <p style="font-size:15px;line-height:1.6;">
+                If you have 30 seconds, leaving us a Google review makes a big difference. It helps others find us and helps us keep improving.
+              </p>
+              <p style="margin-top:32px;">
+                <a href="${reviewUrl}"
+                   style="background:#f97316;color:#000;font-weight:bold;padding:14px 28px;text-decoration:none;display:inline-block;font-family:sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;border-radius:2px;">
+                  ⭐ Leave a Google Review
+                </a>
+              </p>
+              <p style="margin-top:32px;font-size:14px;color:#555;">
+                Thanks again,<br/>
+                <strong>${profile.business_name}</strong>
+              </p>
+              <hr style="border:none;border-top:1px solid #eee;margin-top:32px;" />
+              <p style="font-size:11px;color:#999;">
+                You're receiving this because you recently used ${profile.business_name}. No further emails will be sent.
+              </p>
+            </div>
           `,
         })
 
