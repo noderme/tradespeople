@@ -120,7 +120,7 @@ export default async function HomePage() {
               {
                 step: '03',
                 title: 'Send. Get approved. Get paid.',
-                body: 'Email the quote to your customer on the spot. They open it, approve it, and you get paid — no chasing, no paperwork.',
+                body: 'Email the quote on the spot. A Google review request goes out automatically after every job — silent, no extra steps.',
               },
             ].map(({ step, title, body }) => (
               <div key={step} className="bg-neutral-900 border border-neutral-800 p-8">
@@ -129,6 +129,22 @@ export default async function HomePage() {
                 <p className="text-neutral-400 text-sm leading-relaxed">{body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Google Reviews callout ──────────────────────────────────── */}
+      <section className="px-6 py-12 border-t border-neutral-800 bg-neutral-900">
+        <div className="max-w-3xl mx-auto flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+          <div className="text-4xl shrink-0">⭐</div>
+          <div>
+            <h2 className="font-display font-bold text-2xl uppercase tracking-tight mb-2">
+              Automatic Google review requests — zero effort
+            </h2>
+            <p className="text-neutral-400 text-sm leading-relaxed">
+              Every time you send a quote, a Google review request goes to your customer automatically.
+              No reminder, no extra step, no dashboard to check. Silent and hands-free — reviews build up while you focus on the job.
+            </p>
           </div>
         </div>
       </section>
