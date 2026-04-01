@@ -11,7 +11,7 @@ import type { LineItem, QuoteStatus } from '@/types/database'
  */
 
 interface SkillRequest {
-  action: 'check_user' | 'chat' | 'get_price_history' | 'create_quote' | 'send_quote' | 'get_quotes' | 'get_reviews'
+  action: 'check_user' | 'chat' | 'get_price_history' | 'create_quote' | 'send_quote' | 'get_quotes' | 'get_reviews' | 'send_review_request'
   user_id: string
   data?: Record<string, unknown>
 }
@@ -320,6 +320,77 @@ export async function POST(request: NextRequest): Promise<NextResponse<SkillResp
             total: mapped.length,
             reviews: mapped,
           },
+        })
+      }
+
+      case 'send_review_request': {
+        if (!data || !data.customer_email) {
+          return NextResponse.json({ success: false, action: 'send_review_request', error: 'Missing customer_email' }, { status: 400 })
+        }
+
+        const { customer_email, customer_name } = data as { customer_email: string; customer_name?: string }
+        const email = (customer_email as string).trim().toLowerCase()
+
+        const { data: profile, error: profileErr } = await supabase
+          .from('users')
+          .select('business_name, google_place_id')
+          .eq('id', user_id)
+          .single()
+
+        if (profileErr || !profile) {
+          return NextResponse.json({ success: false, action: 'send_review_request', error: 'User profile not found' }, { status: 404 })
+        }
+
+        if (!profile.google_place_id) {
+          return NextResponse.json({
+            success: false,
+            action: 'send_review_request',
+            error: 'No Google Place ID set. Add it in your profile at https://www.quotejob.app/settings',
+          }, { status: 400 })
+        }
+
+        if (!process.env.RESEND_API_KEY) {
+          return NextResponse.json({ success: false, action: 'send_review_request', error: 'Email service not configured' }, { status: 500 })
+        }
+
+        const reviewUrl = `https://search.google.com/local/writereview?placeid=${profile.google_place_id}`
+        const greeting = customer_name ? `Hi ${customer_name},` : 'Hi,'
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const from = process.env.RESEND_FROM_EMAIL ?? 'quotes@resend.dev'
+
+        const { data: sendData, error: sendError } = await resend.emails.send({
+          from,
+          to: email,
+          subject: `How did we do? — ${profile.business_name}`,
+          html: `
+            <p>${greeting}</p>
+            <p>Thank you for choosing <strong>${profile.business_name}</strong>. We hope everything went smoothly.</p>
+            <p>If you have a moment, we'd really appreciate a quick Google review — it helps us a lot.</p>
+            <p style="margin-top:24px;">
+              <a href="${reviewUrl}" style="background:#f97316;color:#000;font-weight:bold;padding:12px 24px;text-decoration:none;display:inline-block;font-family:sans-serif;font-size:14px;letter-spacing:1px;text-transform:uppercase;">
+                ⭐ Leave a Google Review
+              </a>
+            </p>
+            <p style="margin-top:24px;">Thanks,<br/>${profile.business_name}</p>
+          `,
+        })
+
+        if (sendError) {
+          return NextResponse.json({ success: false, action: 'send_review_request', error: 'Failed to send email' }, { status: 500 })
+        }
+
+        await supabase.from('reviews').insert({
+          user_id,
+          quote_id: null,
+          customer_email: email,
+          resend_email_id: sendData?.id ?? null,
+          status: 'sent',
+        })
+
+        return NextResponse.json({
+          success: true,
+          action: 'send_review_request',
+          result: { message: `Review request sent to ${email}` },
         })
       }
 

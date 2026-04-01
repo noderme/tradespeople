@@ -231,7 +231,7 @@ export type Database = {
         Row: {
           id: string
           user_id: string
-          quote_id: string
+          quote_id: string | null
           customer_email: string
           resend_email_id: string | null
           status: ReviewStatus
@@ -241,7 +241,7 @@ export type Database = {
         Insert: {
           id?: string
           user_id: string
-          quote_id: string
+          quote_id?: string | null
           customer_email: string
           resend_email_id?: string | null
           status?: ReviewStatus
