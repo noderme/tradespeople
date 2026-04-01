@@ -9,6 +9,59 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: 'how-to-get-more-google-reviews-as-a-tradesperson',
+    title: 'How to Get More Google Reviews as a Tradesperson (Without Asking Awkwardly)',
+    metaDescription: 'Google reviews are the #1 factor customers use to choose a tradesperson. Here\'s how plumbers, electricians, and HVAC techs get more reviews without the awkward ask.',
+    date: '2026-04-01',
+    readTime: '4 min',
+    content: `
+      <p class="lead">When someone needs a plumber or electrician, the first thing they do is Google it and read the reviews. Five stars with 40 reviews wins over five stars with 3 — every time. Yet most tradespeople have far fewer reviews than they deserve. Here's why, and how to fix it.</p>
+
+      <h2>Why Tradespeople Don't Get Enough Reviews</h2>
+      <p>It's not because customers are unhappy. Most jobs go well. The problem is timing and friction:</p>
+      <ul>
+        <li>You finish the job, say goodbye, and drive off — the moment is gone</li>
+        <li>Asking face-to-face feels awkward ("can you leave me a review?")</li>
+        <li>Following up by text feels pushy</li>
+        <li>By the time you remember to ask, the customer has moved on</li>
+      </ul>
+      <p>The result: a customer who would have happily left 5 stars never does, simply because nobody asked at the right moment.</p>
+
+      <h2>When Is the Right Moment?</h2>
+      <p>Immediately after the job — within the hour. That's when the customer is most satisfied, the work is fresh, and goodwill is at its peak. The longer you wait, the lower the chance they'll act.</p>
+      <p>This is why automated review requests work so well. The request lands in their inbox while you're still packing up the van — not three days later when they've forgotten about you.</p>
+
+      <h2>What Makes a Good Review Request Email?</h2>
+      <p>Keep it short, personal, and low pressure. The worst review requests feel like corporate spam. The best ones feel like a genuine ask from a real person.</p>
+      <p>Key elements:</p>
+      <ul>
+        <li><strong>Your business name</strong> — so they immediately know who it's from</li>
+        <li><strong>A brief thank you</strong> — acknowledge the specific visit, not a generic message</li>
+        <li><strong>One clear link</strong> — straight to your Google review page, no clicking around</li>
+        <li><strong>No pressure</strong> — "if you have a moment" beats "please leave us a review"</li>
+      </ul>
+
+      <h2>Google Reviews vs Yelp vs Checkatrade — Which Matters Most?</h2>
+      <p>For most tradespeople in the UK and US, <strong>Google is the priority</strong>. It's where people search first, and Google reviews directly affect how high you appear in local search results. More reviews = higher ranking = more leads. Yelp and Checkatrade are secondary — focus on Google first.</p>
+
+      <h2>Does Asking Everyone Hurt Your Rating?</h2>
+      <p>This is the fear that stops most tradespeople from asking. The reality: if you do good work, the overwhelming majority of customers will leave a positive review. The rare unhappy customer is more likely to leave a review whether you ask or not — so asking everyone actually improves your average by surfacing the happy majority.</p>
+
+      <h2>How to Automate It Completely</h2>
+      <p>The most effective system is one that requires zero effort after setup:</p>
+      <ol>
+        <li>Finish the job</li>
+        <li>Send the quote</li>
+        <li>Review request goes to the customer automatically — same email, same moment</li>
+      </ol>
+      <p>TradeQuote does exactly this. When you send a quote to a customer, a Google review request is included automatically — no extra step, no reminder needed. The customer gets the quote and a polite review request in one email, while the job is still fresh.</p>
+      <p>You can also send standalone review requests via ChatGPT — just say "send a review request to [email]" and it's done in seconds. No dashboard, no copy-pasting links, no awkward conversations.</p>
+
+      <h2>How Many Reviews Do You Need?</h2>
+      <p>There's no magic number, but local search data consistently shows that businesses with 50+ reviews significantly outperform those with under 10 — in both ranking and conversion. If you're sending 5 quotes a week and converting half to reviews, you'll hit 50 reviews in under 5 months without lifting a finger.</p>
+    `,
+  },
+  {
     slug: 'send-a-quote-from-your-phone-on-site',
     title: 'How to Send a Professional Quote From Your Phone While Still On-Site',
     metaDescription: 'Stop going back to the office to write quotes. This is how tradespeople send branded PDF quotes to customers in under 60 seconds — directly from their phone.',
