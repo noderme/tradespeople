@@ -74,14 +74,14 @@ export default async function HomePage() {
 
           <div className="flex flex-wrap justify-center gap-3 mt-10">
             {[
-              '⚡ Quote in 60 seconds',
-              '📄 Branded PDF',
-              '⭐ Auto Google reviews',
-              '💬 Works in ChatGPT',
-              '0 paperwork',
-            ].map(f => (
-              <span key={f} className="bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold uppercase tracking-wider px-4 py-2">
-                {f}
+              { label: '⚡ Quote in 60 seconds', cls: 'bg-orange-500 text-black' },
+              { label: '📄 Branded PDF', cls: 'bg-blue-600 text-white' },
+              { label: '⭐ Auto Google reviews', cls: 'bg-yellow-400 text-black' },
+              { label: '💬 Works in ChatGPT', cls: 'bg-emerald-500 text-black' },
+              { label: '0 paperwork', cls: 'bg-purple-600 text-white' },
+            ].map(({ label, cls }) => (
+              <span key={label} className={`${cls} text-xs font-bold uppercase tracking-wider px-4 py-2`}>
+                {label}
               </span>
             ))}
           </div>
