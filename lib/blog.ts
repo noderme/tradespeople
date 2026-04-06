@@ -352,6 +352,148 @@ export const BLOG_POSTS: BlogPost[] = [
   },
 
   {
+    slug: 'how-to-set-your-labour-rate-as-a-tradesperson',
+    title: 'How to Set Your Labour Rate as a Tradesperson (Without Underselling Yourself)',
+    metaDescription: 'Not sure what to charge per hour? This guide helps plumbers, electricians, and HVAC techs calculate a labour rate that covers costs, pays a wage, and wins work.',
+    date: '2026-04-02',
+    readTime: '5 min',
+    content: `
+      <p class="lead">Most tradespeople set their hourly rate by guessing what sounds reasonable, or copying what a mate charges. That's how you end up either losing money or losing jobs. Here's how to work out a rate that actually makes sense for your business.</p>
+
+      <h2>Why Getting Your Rate Wrong Is Expensive</h2>
+      <p>Too low and you're working hard for a wage that doesn't cover your costs. Too high and you price yourself out of jobs before you've had a chance to show your quality. The goal is a rate that:</p>
+      <ul>
+        <li>Covers all your business costs</li>
+        <li>Pays you a proper wage</li>
+        <li>Leaves room for profit</li>
+        <li>Is competitive in your local market</li>
+      </ul>
+      <p>You can't hit all four by guessing.</p>
+
+      <h2>Step 1: Work Out Your Annual Costs</h2>
+      <p>Before you can charge enough, you need to know what "enough" is. Add up everything your business costs you in a year:</p>
+      <ul>
+        <li><strong>Van:</strong> finance or depreciation, insurance, fuel, servicing</li>
+        <li><strong>Tools and equipment:</strong> purchases, repairs, replacements</li>
+        <li><strong>Insurance:</strong> public liability, employer's liability, tool cover</li>
+        <li><strong>Certifications and memberships:</strong> Gas Safe, NICEIC, trade association fees</li>
+        <li><strong>Marketing:</strong> website, advertising, listing fees</li>
+        <li><strong>Accounting and admin software</strong></li>
+        <li><strong>Phone and data plan</strong></li>
+        <li><strong>PPE and workwear</strong></li>
+      </ul>
+      <p>Most sole trader tradespeople are surprised to find their overheads run to £15,000–£25,000 a year before they pay themselves a penny.</p>
+
+      <h2>Step 2: Work Out Your Billable Hours</h2>
+      <p>You don't bill for every hour you work. A realistic year looks like this:</p>
+      <ul>
+        <li>52 weeks minus 4 weeks holiday = 48 working weeks</li>
+        <li>5 days × 8 hours = 40 hours/week potential</li>
+        <li>Minus travel time, admin, quoting, buying materials: realistically 5–6 billable hours/day</li>
+        <li>Minus sick days, callbacks, and quiet periods: knock off another 10–15%</li>
+      </ul>
+      <p>A realistic billable figure for a sole trader is around <strong>900–1,100 hours per year</strong>. Use 1,000 hours as a starting point.</p>
+
+      <h2>Step 3: Calculate Your Break-Even Rate</h2>
+      <p>Divide your total annual costs by your billable hours. If your overheads are £20,000:</p>
+      <p><strong>£20,000 ÷ 1,000 hours = £20/hour just to break even</strong></p>
+      <p>That's before you pay yourself. Add your target salary — say £40,000 — and divide again:</p>
+      <p><strong>(£20,000 + £40,000) ÷ 1,000 hours = £60/hour minimum</strong></p>
+      <p>Add a 20% profit margin on top: <strong>£72/hour</strong>. That's your floor — the minimum that keeps your business viable.</p>
+
+      <h2>Step 4: Check Against Your Local Market</h2>
+      <p>Your calculated rate needs to be in range for your area. UK rates by trade (2025):</p>
+      <ul>
+        <li><strong>Plumber:</strong> £45–£80/hour (Gas Safe registered: add £10–£20)</li>
+        <li><strong>Electrician:</strong> £45–£75/hour (approved contractor: add premium)</li>
+        <li><strong>HVAC technician:</strong> £50–£90/hour</li>
+        <li><strong>Roofer:</strong> £150–£250/day</li>
+        <li><strong>Gas engineer:</strong> £60–£100/hour</li>
+      </ul>
+      <p>London and South East rates run 20–40% higher than the national average. If your calculated rate is well below market, you have room to charge more. If it's above market, look hard at your costs — or your target area.</p>
+
+      <h2>Fixed Price vs Hourly Rate</h2>
+      <p>Many experienced tradespeople move away from hourly rates for standard jobs. Once you know how long a boiler swap or consumer unit replacement takes, you can quote a fixed price — and earn more per hour when you're efficient.</p>
+      <p>Fixed pricing also removes the customer's anxiety about the meter running. "£450 to replace the immersion heater" is easier to say yes to than "£65/hour, probably 4–5 hours".</p>
+      <p>Use hourly rates for investigation work and reactive calls. Use fixed prices for everything repeatable.</p>
+
+      <h2>Don't Compete on Price</h2>
+      <p>The customers who haggle hardest on price are usually the hardest to work for. Tradespeople who cut their rate to win jobs end up working longer hours for less money. The answer is to compete on speed, professionalism, and trust — not price.</p>
+      <p>Sending a clean, branded PDF quote within an hour of a site visit does more to win a job than dropping £10/hour off your rate. Customers choosing between three quotes often go with whoever looks most professional and responds fastest — not whoever is cheapest.</p>
+
+      <h2>Review Your Rate Every Year</h2>
+      <p>Material costs, fuel, insurance, and certification fees all go up. If you haven't reviewed your rate in two years, you're almost certainly undercharging. Build in an annual review — January is a natural time — and put rates up by at least the rate of inflation.</p>
+
+      <h2>The Fastest Way to Quote at Your New Rate</h2>
+      <p>Once you've set your rate, make sure every quote reflects it accurately. TradeQuote stores your labour rate and uses it automatically when you describe a job — so you never accidentally undercharge because you forgot to update a spreadsheet template. Describe the job in plain English, get a professional PDF, send it from your phone before you leave the site.</p>
+    `,
+  },
+
+  {
+    slug: 'how-to-follow-up-on-a-quote',
+    title: 'How to Follow Up on a Quote Without Being Pushy',
+    metaDescription: 'Sent a quote and heard nothing back? Here\'s exactly when and how to follow up with a customer — without sounding desperate or annoying.',
+    date: '2026-04-06',
+    readTime: '4 min',
+    content: `
+      <p class="lead">You sent the quote. It's been two days. Nothing. Most tradespeople either chase immediately and come across desperate, or wait too long and lose the job to someone faster. Here's how to follow up in a way that wins work without damaging the relationship.</p>
+
+      <h2>Why Quotes Go Silent</h2>
+      <p>A customer going quiet after a quote doesn't always mean they've chosen someone else. The most common reasons:</p>
+      <ul>
+        <li>They're waiting to get a second or third quote</li>
+        <li>They haven't had time to read it properly</li>
+        <li>They need to talk to a partner or landlord before deciding</li>
+        <li>The quote landed in their spam folder</li>
+        <li>Life got in the way — they forgot</li>
+      </ul>
+      <p>A well-timed follow-up catches the jobs that would have slipped through the cracks for no real reason.</p>
+
+      <h2>When to Follow Up</h2>
+      <p>Timing matters more than what you say.</p>
+
+      <h3>First follow-up: 24–48 hours</h3>
+      <p>A quick check-in the day after sending the quote is completely normal and expected. At this point, you're just making sure they received it — not chasing a decision.</p>
+
+      <h3>Second follow-up: 5–7 days</h3>
+      <p>If you've heard nothing after a week, a second message is reasonable. Keep it brief. You're checking if they have any questions, not pressuring them.</p>
+
+      <h3>After that: let it go</h3>
+      <p>If there's still no response after two follow-ups, the job has almost certainly gone elsewhere. One final message — "just checking if you still need this done" — is the absolute maximum. Move on.</p>
+
+      <h2>What to Say: Scripts That Work</h2>
+
+      <h3>First follow-up (text or email)</h3>
+      <p><em>"Hi [name], just checking you received the quote I sent yesterday for [job]. Happy to answer any questions — let me know if you'd like to go ahead."</em></p>
+      <p>That's it. Short, confident, no pressure.</p>
+
+      <h3>Second follow-up</h3>
+      <p><em>"Hi [name], following up on the quote from last week. Are you still looking to get this done? Happy to chat if you have any questions about the work."</em></p>
+
+      <h3>Final message</h3>
+      <p><em>"Hi [name], just a final check-in on the quote. No worries if you've gone with someone else — just let me know either way so I can free up the slot."</em></p>
+      <p>The last line is key. Giving them an easy out often prompts a reply — either a yes or a no, both of which are better than silence.</p>
+
+      <h2>What Not to Do</h2>
+      <ul>
+        <li><strong>Don't follow up the same day</strong> — it looks desperate</li>
+        <li><strong>Don't justify your price unprompted</strong> — if they haven't raised price as an issue, don't bring it up</li>
+        <li><strong>Don't send multiple messages in the same week</strong> — once is enough per follow-up window</li>
+        <li><strong>Don't sound annoyed</strong> — customers can feel it, and it ends the conversation</li>
+        <li><strong>Don't drop your price to get a response</strong> — this trains customers to ignore your first quote</li>
+      </ul>
+
+      <h2>Follow Up With Context, Not Just a Nudge</h2>
+      <p>The best follow-ups reference something specific. If you know the customer viewed your quote, you can follow up with confidence rather than wondering if they even saw it. If you know they haven't opened it, your first message is about resending — not chasing a decision they haven't made yet.</p>
+      <p>TradeQuote tracks whether your customer has viewed the quote, so your follow-up is always relevant. No more guessing — you can see exactly when they opened it and follow up at the right moment.</p>
+
+      <h2>The Fastest Wins Come From Speed, Not Chasing</h2>
+      <p>The best way to reduce the need for follow-ups is to send quotes faster in the first place. Customers who receive a quote within an hour are far more likely to respond quickly. By the time you're following up two days later, they may already have accepted someone else's quote.</p>
+      <p>TradeQuote lets you send a professional PDF quote from your phone in under 60 seconds — while you're still on site. The faster your quote lands, the less chasing you need to do.</p>
+    `,
+  },
+
+  {
     slug: 'ai-quote-generator-for-tradespeople',
     title: 'AI Quote Generator for Tradespeople: How It Works and Why It\'s Faster',
     metaDescription: 'AI quote generators let plumbers, electricians, and HVAC techs create professional PDF job quotes in seconds. Here\'s how they work and what to look for.',
