@@ -494,6 +494,93 @@ export const BLOG_POSTS: BlogPost[] = [
   },
 
   {
+    slug: 'how-to-quote-a-roofing-job',
+    title: 'How to Quote a Roofing Job: A Complete Guide for Roofers',
+    metaDescription: 'Learn how to quote a roofing job accurately — covering materials, labour, scaffolding, waste disposal, and how to send a professional roofing quote fast.',
+    date: '2026-04-07',
+    readTime: '5 min',
+    content: `
+      <p class="lead">Roofing quotes are high-value and competitive. Get the numbers wrong and you either lose money on the job or lose the job to a cheaper quote. This guide covers how to build an accurate, professional roofing quote — and get it to the customer before your competitors do.</p>
+
+      <h2>What Makes Roofing Quotes Different</h2>
+      <p>Roofing jobs have more moving parts than most trades. A single quote needs to account for:</p>
+      <ul>
+        <li>Variable material quantities (tiles, felt, battens, ridge, hip, lead flashing)</li>
+        <li>Scaffolding costs — which can vary wildly by access and height</li>
+        <li>Skip hire and waste disposal</li>
+        <li>Weather dependency and scheduling risk</li>
+        <li>Structural unknowns (rotten timbers, inadequate decking)</li>
+      </ul>
+      <p>Miss any of these and your margin disappears. Include them clearly and you look professional — which matters when a customer is weighing up three quotes for a job worth thousands.</p>
+
+      <h2>What Every Roofing Quote Should Include</h2>
+
+      <h3>1. Materials — Itemised</h3>
+      <p>List every material line separately: tiles or slates, underfelt, battens, ridge tiles, hip tiles, valley materials, lead or GRP flashing, fixings. Customers can't compare quotes when one says "materials: £1,200" and yours says nothing.</p>
+      <p>Always spec the material grade. "Sandtoft concrete interlocking tiles" is more trustworthy than "tiles." It also protects you if a customer later disputes what they were quoted.</p>
+
+      <h3>2. Labour</h3>
+      <p>Break out labour from materials. State whether it's a fixed price or a day rate. For larger jobs, show labour per section — stripping, felt and batten, tiling, ridge, lead work — so the customer understands what they're paying for.</p>
+
+      <h3>3. Scaffolding</h3>
+      <p>Either include scaffolding as a line item or explicitly exclude it and state that a scaffolding contractor's quote applies separately. Never leave it ambiguous — scaffold disputes are one of the most common causes of roofing payment problems.</p>
+
+      <h3>4. Waste Removal</h3>
+      <p>Skip hire, bag removal, or tipping fees need to be on the quote. If it's included, say so. If it's not, say so. A customer who sees £300 on the final invoice for waste removal — when it wasn't on the quote — will argue.</p>
+
+      <h3>5. Exclusions</h3>
+      <p>Always state what's not included. Common roofing exclusions:</p>
+      <ul>
+        <li>Replacement of rotten timbers or sarking boards (price on discovery)</li>
+        <li>Chimney repointing or rebuilding</li>
+        <li>Guttering replacement</li>
+        <li>VELUX or skylight installation</li>
+        <li>Fascia and soffit work</li>
+      </ul>
+      <p>If you find rotten timbers once the old roof is off, you need a paper trail that shows this wasn't in scope — or you'll be expected to fix it for free.</p>
+
+      <h3>6. Guarantee</h3>
+      <p>State your workmanship guarantee clearly — typically 10 years for a new roof, 5 years for a repair. If you're a member of a trade association (NFRC, TrustMark), include it. This is a major trust signal for high-value roofing jobs.</p>
+
+      <h3>7. Payment Terms</h3>
+      <p>For roofing jobs, a deposit is standard — typically 25–40% upfront to cover materials. State this clearly on the quote, along with when the balance is due (on completion, or in staged payments for larger jobs).</p>
+
+      <h2>How to Estimate Roofing Materials</h2>
+      <p>For a standard pitched roof:</p>
+      <ul>
+        <li>Measure the roof area in m² (length × width × pitch factor — use 1.15 for a 30° pitch, 1.3 for 45°)</li>
+        <li>Add 10% for cuts and waste</li>
+        <li>Check the tile manufacturer's coverage rate — typically 10–16 tiles per m² depending on tile type</li>
+        <li>Calculate ridge and hip lengths separately — these need their own tiles or capping</li>
+        <li>Lead flashings: measure linear metres of abutments, valleys, and chimney details</li>
+      </ul>
+      <p>Under-ordering materials mid-job causes delays and can mean going back to the merchant twice — which costs time and money. Always over-order slightly.</p>
+
+      <h2>Estimate vs Fixed Price for Roofing</h2>
+      <p>Give a <strong>fixed price</strong> for straightforward re-roofing where you've fully assessed the job. Give an <strong>estimate with a contingency range</strong> for older roofs where you can't see the structure until stripping starts.</p>
+      <p>Never give a single fixed price if there's a realistic chance of rotten timbers — this is how roofers lose money. "£4,200 fixed, plus £45/m² for any rotten sarking discovered on strip" is fair, transparent, and protects you.</p>
+
+      <h2>How to Send the Quote Quickly</h2>
+      <p>Speed matters in roofing. A customer getting three quotes often goes with the first professional one that lands. Waiting until you get back to the office to write it up on a spreadsheet costs you jobs.</p>
+      <p>With TradeQuote, you can describe the job in plain English — "re-roof detached house, 85m², concrete interlocking tiles, scaffolding included, skip hire, 10-year guarantee" — and get a branded PDF quote sent to the customer's email in under 60 seconds. Works from your phone while you're still on the drive.</p>
+
+      <h2>Final Checklist Before Sending a Roofing Quote</h2>
+      <ul>
+        <li>Materials itemised with specifications?</li>
+        <li>Labour clearly stated — fixed or day rate?</li>
+        <li>Scaffolding — included or excluded and stated?</li>
+        <li>Waste disposal — included or excluded and stated?</li>
+        <li>Exclusions listed (timbers, guttering, etc.)?</li>
+        <li>Workmanship guarantee included?</li>
+        <li>Deposit amount and payment terms clear?</li>
+        <li>Quote validity period stated?</li>
+        <li>Your business name, contact, and trade memberships on the document?</li>
+      </ul>
+      <p>A thorough, itemised roofing quote builds trust before the job starts — and protects you if anything is disputed after.</p>
+    `,
+  },
+
+  {
     slug: 'ai-quote-generator-for-tradespeople',
     title: 'AI Quote Generator for Tradespeople: How It Works and Why It\'s Faster',
     metaDescription: 'AI quote generators let plumbers, electricians, and HVAC techs create professional PDF job quotes in seconds. Here\'s how they work and what to look for.',
